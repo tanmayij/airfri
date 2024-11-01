@@ -101,33 +101,59 @@ __global__ void commit_kernel(
     //     printf("\n");
     // }
 
+    // Hash only codewords for the first layer
+    uint64_t combined[2 * HASH_WORDS];
+    uint8_t digest[HASH_SIZE];
     if (I < N / 2) {
-        uint64_t combined[2 * HASH_WORDS];
-        uint8_t digest[HASH_SIZE];
         memcpy(combined, &device_codeword[idx1], HASH_WORDS * sizeof(uint64_t));  
         memcpy(combined + HASH_WORDS, &device_codeword[idx2], HASH_WORDS * sizeof(uint64_t));  
-        SHA3(digest, (uint8_t *)combined, 8 * sizeof(uint64_t), 256);
+        SHA3(digest, (uint8_t *)combined, 2 * HASH_WORDS * sizeof(uint64_t), 256);
         memcpy((uint8_t *)&device_layer_hashes[I * HASH_WORDS], digest, 32);
     }
     __syncthreads();
+
+    //for subsequent layers, combine hash with codeword until the last codeword layer
+    for (int layer = 1; layer < 12 /*number of rounds*/; layer++) {
+        if (I < (N / (2 * (1 << layer)))) {
+            int codeword_idx = (1 << layer) * I * FIELD_WORDS;
+            memcpy(combined, &device_layer_hashes[(I * 2) * HASH_WORDS], HASH_WORDS * sizeof(uint64_t));
+            memcpy(combined + HASH_WORDS, &device_codeword[codeword_idx], HASH_WORDS * sizeof(uint64_t));
+
+            SHA3(digest, (uint8_t *)combined, 2 * HASH_WORDS * sizeof(uint64_t), 256);
+            memcpy((uint8_t *)&device_layer_hashes[I * HASH_WORDS], digest, 32);
+        }
+        __syncthreads();
+    }
 }
 
 __global__ void merkle_kernel(uint64_t *device_layer_hashes, uint64_t *device_merkle_root, int N) {
     int I = blockIdx.x * blockDim.x + threadIdx.x;
 
+    // Iterate until only the root remains
     while (N > 1) {
         if (I < N / 2) {
             uint64_t combined[2 * HASH_WORDS];
             uint8_t digest[HASH_SIZE];
+
+            // Combine two hashes from the current layer
             memcpy(combined, &device_layer_hashes[(2 * I) * HASH_WORDS], HASH_WORDS * sizeof(uint64_t));  
             memcpy(combined + HASH_WORDS, &device_layer_hashes[(2 * I + 1) * HASH_WORDS], HASH_WORDS * sizeof(uint64_t));  
+
+            // Hash the combined result to obtain the parent node
             SHA3(digest, (uint8_t *)combined, 2 * HASH_WORDS * sizeof(uint64_t), 256);
+
+            // Store the digest in the parent position in the next layer
             memcpy((uint8_t *)&device_layer_hashes[I * HASH_WORDS], digest, 32);
         }
+
+        // Synchronize threads before reducing N
         __syncthreads();
+
+        // Halve the number of nodes for the next layer
         N /= 2;
     }
 
+    // Assign the root hash to the output only once, when N == 1
     if (I == 0) {
         memcpy(device_merkle_root, device_layer_hashes, HASH_SIZE);  
         printf("Final Merkle root: ");
@@ -137,6 +163,32 @@ __global__ void merkle_kernel(uint64_t *device_layer_hashes, uint64_t *device_me
         printf("\n");
     }
 }
+
+// __global__ void merkle_kernel(uint64_t *device_layer_hashes, uint64_t *device_merkle_root, int N) {
+//     int I = blockIdx.x * blockDim.x + threadIdx.x;
+
+//     while (N > 1) {
+//         if (I < N / 2) {
+//             uint64_t combined[2 * HASH_WORDS];
+//             uint8_t digest[HASH_SIZE];
+//             memcpy(combined, &device_layer_hashes[(2 * I) * HASH_WORDS], HASH_WORDS * sizeof(uint64_t));  
+//             memcpy(combined + HASH_WORDS, &device_layer_hashes[(2 * I + 1) * HASH_WORDS], HASH_WORDS * sizeof(uint64_t));  
+//             SHA3(digest, (uint8_t *)combined, 2 * HASH_WORDS * sizeof(uint64_t), 256);
+//             memcpy((uint8_t *)&device_layer_hashes[I * HASH_WORDS], digest, 32);
+//         }
+//         __syncthreads();
+//         N /= 2;
+//     }
+
+//     if (I == 0) {
+//         memcpy(device_merkle_root, device_layer_hashes, HASH_SIZE);  
+//         printf("Final Merkle root: ");
+//         for (int j = 0; j < HASH_WORDS; ++j) {
+//             printf("%016lx ", device_merkle_root[j]);
+//         }
+//         printf("\n");
+//     }
+// }
 
 void commit_launch(
     uint64_t **codeword, uint64_t **codeword_nxt, 
@@ -271,9 +323,10 @@ void commit_launch(
     write_to_file("temp5.txt", flattened_temp5, FIELD_WORDS, N/2);
     write_to_file("alpha_offset.txt", flattened_alpha_offset, FIELD_WORDS, N/2);
 
-    if (N == 32) {
+    if (N == 64) {
         while (N > 1) {
-            int tpb = 32; 
+            printf("reaching here tanjan\n");
+            int tpb = 64; 
             int nb = 1;
             merkle_kernel<<<nb, tpb>>>(device_layer_hashes, device_merkle_root, N);
             N = N / 2;

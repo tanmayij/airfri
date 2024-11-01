@@ -483,7 +483,7 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len)
     uint64_t *sampled_alpha_for_proofstream = (uint64_t *) malloc (FIELD_WORDS * sizeof(uint64_t));
     memcpy(sampled_alpha_for_proofstream, sampled_alpha, FIELD_WORDS * sizeof(uint64_t));
 
-    uint64_t *root = (uint64_t *)malloc(4 * sizeof(uint64_t)); //32 bytes for merkle tree hash
+    uint64_t *root = (uint64_t *)malloc(HASH_WORDS * sizeof(uint64_t)); //32 bytes for merkle tree hash
     for(int r = 0; r < fri_num_rounds(fri); r++){
         uint64_t *eval_basis = populate_eval_basis(basis_len - r);
         if (eval_basis != NULL) {
@@ -593,11 +593,13 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         //for a_index
         size_t proof_len_a = 0;
         uint64_t **auth_path_a = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
+        size_t *proof_len_ptr_a = (size_t *)malloc(sizeof(size_t));
         for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
         auth_path_a[i] = (uint64_t *)malloc(HASH_SIZE);  // Allocate space for each hash
         }
         merkle_open(codewords, current_codeword_len, global_query_indices.a_indices[s], auth_path_a, &proof_len_a, field_words);
-        push_object(global_proof_stream, &proof_len_a);
+        *proof_len_ptr_a = proof_len_a;
+        push_object(global_proof_stream, proof_len_ptr_a);
         push_count++;
         for (size_t i = 0; i < proof_len_a; i++) {
         //auth_path_a[%zu]\n", i);
@@ -612,13 +614,15 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         free(auth_path_a);
 
         //for b_index
-        size_t proof_len_b = 0;
+        size_t proof_len_b = 0; 
         uint64_t **auth_path_b = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
+        size_t *proof_len_ptr_b = (size_t *)malloc(sizeof(size_t));
         for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
         auth_path_b[i] = (uint64_t *)malloc(HASH_SIZE);  //allocate space for each hash
         }
         merkle_open(codewords, current_codeword_len, global_query_indices.b_indices[s], auth_path_b, &proof_len_b, field_words);
-        push_object(global_proof_stream, &proof_len_b);
+        *proof_len_ptr_b = proof_len_b;
+        push_object(global_proof_stream, proof_len_ptr_b);
         push_count++;
         for (size_t i = 0; i < proof_len_b; i++) {
         //printf("Pushing auth_path_b[%zu]\n", i);
@@ -635,11 +639,13 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         //for c_index
         size_t proof_len_c = 0;
         uint64_t **auth_path_c = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
+        size_t *proof_len_ptr_c = (size_t *)malloc(sizeof(size_t));
         for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
         auth_path_c[i] = (uint64_t *)malloc(HASH_SIZE);  //allocate space for each hash
         }
         merkle_open(codewords, next_codeword_len, global_query_indices.c_indices[s], auth_path_c, &proof_len_c, field_words);
-        push_object(global_proof_stream, &proof_len_c);
+        *proof_len_ptr_c = proof_len_c;
+        push_object(global_proof_stream, proof_len_ptr_c);
         push_count++;
         for (size_t i = 0; i < proof_len_c; i++) {
         //printf("Pushing auth_path_c[%zu]\n", i);
@@ -808,7 +814,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
         printf("But should be no more than: %d\n", degree);
         return 0;
     } 
-    for (r = 0; r < fri_num_rounds(fri); r++) {
+    for (r = 0; r < fri_num_rounds(fri) - 1; r++) {
         const int max_fri_domains = sizeof(preon.fri_domains) / sizeof(preon.fri_domains[0]);
         int basis_len = fri_log_domain_length(fri) >> (r); 
         eval_basis = populate_eval_basis(basis_len);

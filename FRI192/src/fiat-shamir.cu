@@ -83,7 +83,7 @@ void push_object(ProofStream *ps, void *obj) {
 // Pull an object from the ProofStream
 void* pull_object(ProofStream *ps) {
     if (ps->read_index < ps->num_objects) {
-        printf("ProofStream after pull: num_objects = %zu, read_index = %zu\n", ps->num_objects, ps->read_index);
+        //printf("ProofStream after pull: num_objects = %zu, read_index = %zu\n", ps->num_objects, ps->read_index);
         // for (size_t i = 0; i < ps->num_objects; i++) {
         // printf("  Object %zu: %p\n", i, ps->objects[ps->num_objects++]);
         // }
