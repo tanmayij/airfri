@@ -1,4 +1,3 @@
-can you give me a .cuh file for this:
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -8,7 +7,7 @@ can you give me a .cuh file for this:
 #include <cuda_runtime.h>
 #include <math.h>
 #include "../include/fiat-shamir.cuh"
-#include "../include/fri-gpu.cuh"
+#include "../include/fri.cuh"
 #include "../include/merkle.cuh"
 #include "../include/params.cuh"
 #include "../include/field.cuh"
@@ -16,6 +15,16 @@ can you give me a .cuh file for this:
 #include "../include/domain.cuh"
 #include "../include/commit-launch-merkle.cuh"
 #include "../include/poly-eval-launch.cuh"
+#define FIELD_WORDS 4
+ProofStream* global_proof_stream = NULL;
+QueryIndices global_query_indices;
+
+// typedef struct {
+//     size_t size;
+//     size_t basis_len;
+//     const uint64_t *basis;
+//     const uint64_t *shift;
+// } Domain;
 // Function to populate an eval basis array with non-zero basis elements for a given basis_len
 uint64_t* populate_eval_basis(int basis_len) {
     int found = -1;
@@ -33,7 +42,7 @@ uint64_t* populate_eval_basis(int basis_len) {
     }
 
     int count = 0;
-    for (int i = 0; i < (preon.fri_domains[i].basis_len) * 4; i++) {
+    for (int i = 0; i < (preon.fri_domains[found].basis_len) * 4; i++) {
         if (preon.fri_domains[found].basis[i] != 0) {
             count++;
         }
@@ -44,7 +53,7 @@ uint64_t* populate_eval_basis(int basis_len) {
         return NULL;
     }
     int index = 0;
-    for (int i = 0; i < (preon.fri_domains[i].basis_len) * 4; i++) {
+    for (int i = 0; i < (preon.fri_domains[found].basis_len) * 4; i++) {
         if (preon.fri_domains[found].basis[i] != 0) {
             eval_basis[index++] = preon.fri_domains[found].basis[i];
         }
@@ -476,7 +485,7 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len)
 
     uint64_t *root = (uint64_t *)malloc(4 * sizeof(uint64_t)); //32 bytes for merkle tree hash
     for(int r = 0; r < fri_num_rounds(fri); r++){
-        eval_basis = populate_eval_basis(basis_len - r);
+        uint64_t *eval_basis = populate_eval_basis(basis_len - r);
         if (eval_basis != NULL) {
             printf("Eval basis for basis_len %d:\n", basis_len);
             for (int i = 0; i < basis_len; i++) {
@@ -485,7 +494,7 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len)
             printf("\n");
         }
         printf("round: %d\n", r);
-        offset = get_offset_for_basis(basis_len - r);
+        uint64_t offset = get_offset_for_basis(basis_len - r);
         if (offset != 0) {
             printf("Offset for basis_len %d is: %016lx\n", basis_len, offset);
         } else {
@@ -503,11 +512,14 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len)
         printf("\n");
 
         codewords[r] = codeword;
-        uint64_t *denominator_inv = &precomputed_inverses[exponent + r];
-        print_field("denominator inverse", denominator_inv, 1);
+        int exponent = preon.fri_domains[0].basis_len - fri_log_domain_length(fri);
+        printf("preon.fri_domains[0].basis_len: %d\n", preon.fri_domains[0].basis_len);
+        uint64_t denominator_inv = 0;
+        denominator_inv = precomputed_inverses[exponent + r]; 
+        printf("denominator inverse %016lx\n", denominator_inv);
         uint64_t **codeword_nxt = (uint64_t **)malloc((N/2)*sizeof(uint64_t *)); 
 
-        commit_launch(codeword, codeword_nxt, alpha, offset, denominator_inv[0], eval_basis, N, root);
+        commit_launch(codeword, codeword_nxt, alpha, &offset, denominator_inv, eval_basis, N, root);
         if(N > 32) {
         N = N / 2;
         codeword = codeword_nxt;
@@ -565,7 +577,7 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
     global_query_indices.b_indices, global_query_indices.num_colinearity_tests);
 
     //the below loop is going to run for each round, for the total number of tests. 
-    for(int s = 0; s < num_leaves; s++){
+    for(int s = 0; s < num_tests; s++){
         push_object(global_proof_stream, current_codeword[global_query_indices.a_indices[s]]);
         print_field("current_codeword[a_indices[s]]", current_codeword[global_query_indices.a_indices[s]], field_words);
         push_count++;
@@ -663,11 +675,11 @@ size_t* prove(Fri* fri, uint64_t **codeword) {
     size_t *reduced_indices = (size_t *)malloc(fri->num_colinearity_tests * sizeof(size_t));
 
     //sample indices for the first round
-    sample_indices(seed, 32, codeword_length / 2, (fri->initial_domain_length >> (fri_num_rounds(fri))), fri->num_colinearity_tests top_level_indices, reduced_indices);
+    sample_indices(seed, 32, codeword_length / 2, (fri->initial_domain_length >> (fri_num_rounds(fri))), fri->num_colinearity_tests, top_level_indices, reduced_indices);
     size_t *indices = (size_t *)malloc(fri->num_colinearity_tests * sizeof(size_t));
     memcpy(indices, top_level_indices, fri->num_colinearity_tests * sizeof(size_t));
 
-    for (size_t i = 0; i < fri_num_rounds(fri); i++) { 
+    for (size_t i = 0; i < fri_num_rounds(fri) - 1; i++) { 
         query(fri, codewords, codewords[i], codeword_length, codewords[i + 1], codeword_length / 2, indices);
         memcpy(global_indices_tracker.round_indices[i], indices, fri->num_colinearity_tests * sizeof(size_t));
 
@@ -756,13 +768,15 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
     memcpy(copied_last_codeword, last_codeword_arr, HASH_SIZE);
 
     //degree fetch
-    degree = (last_codeword_length / fri->expansion_factor) - 1; //if last codeword length = 32, this should be 0
+    degree = (last_codeword_length * fri_num_rounds(fri) / fri->expansion_factor) - 1; //if last codeword length = 32, this should be 0
     //last basis and offset
     uint64_t *last_basis = (uint64_t *)malloc((int)log2(last_codeword_length) * sizeof(uint64_t));
     last_basis = populate_eval_basis((int)log2(last_codeword_length));
     uint64_t last_offset = get_offset_for_basis((int)log2(last_codeword_length));
 
     Domain last_domain;
+    int r = fri_num_rounds(fri);
+
     initialize_domain(&last_domain, fri->initial_domain_length >> r, last_basis, &last_offset);
     uint64_t **last_domain_elements = (uint64_t **)malloc(last_domain.size * sizeof(uint64_t *));
     for (int i = 0; i < last_domain.size; i++) {
@@ -774,14 +788,14 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
     uint64_t poly_coeffs_[field_words * last_domain.size];
     interpolate_domain_single(poly_coeffs_, last_domain_elements, copied_last_codeword, last_domain.size, FIELD_WORDS);
     uint64_t eval_result[FIELD_WORDS];
-    poly_eval_over_domain(eval_result, poly_coeffs_, last_domain.size, last_domain, field_words, preon.field_bytesize); //this function calls fft
+    poly_eval_over_domain(eval_result, poly_coeffs_, last_domain.size, &last_domain, field_words, preon.field_bytesize); //this function calls fft
     if (memcmp(copied_last_codeword, eval_result, FIELD_WORDS * sizeof(uint64_t)) == 0) {
         printf("Re-evaluated codeword does not match original!\n");
         free(root_verify);
         for (int j = 0; j < last_domain.size; j++) {
-            free(domain_elements[j]);
+            free(last_domain_elements[j]);
         }
-        free(domain_elements);
+        free(last_domain_elements);
         return 0;
     }
     if (poly_deg(poly_coeffs_, last_domain.size, FIELD_WORDS) <= degree) {
@@ -832,8 +846,14 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
 
         uint64_t precomputed_inverses[max_fri_domains];
         load_precomputed_inverses("fri_inverses_256.txt", precomputed_inverses);
-        int exponent = max_fri_domains - fri_log_domain_length(fri); 
-        uint64_t *denominator_inv = &precomputed_inverses[exponent + r]; 
+        int exponent = preon.fri_domains[0].basis_len - fri_log_domain_length(fri); 
+        uint64_t denominator_inv[field_words] = {0};
+    
+        denominator_inv[0] = precomputed_inverses[exponent + r]; 
+        printf("denominator inverse %016lx\n", denominator_inv[0]);
+        denominator_inv[1] = {0};
+        denominator_inv[2] = {0};
+        denominator_inv[3] = {0};
         //colinearity check. to change: ideally, we must check if merkle root verifies and then perform check. but for now this order is okay.
         for(int s = 0; s < fri -> num_colinearity_tests; s++){
             ay[s] = (uint64_t *)pull_object(global_proof_stream);
@@ -885,22 +905,35 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
             uint64_t temp3[field_words] = {0};
             uint64_t temp4[field_words] = {0};
             uint64_t temp5[field_words] = {0};
-            uint64_t den_inv[field_words] = {0};
 
-            i_th_ele_in_span(ax_temp, eval_basis,  exponent + r, global_query_indices.a_indices[s]);
-            field_add(ax, ax_temp, offset, field_words);
-            i_th_ele_in_span(bx_temp, eval_basis,  exponent + r, global_query_indices.b_indices[s]);
-            field_add(bx, offset, bx_temp, field_words);
+            i_th_ele_in_span(ax_temp, eval_basis, basis_len - r, global_query_indices.a_indices[s]);
+            field_add(ax, ax_temp, &offset, field_words);
+            print_field("ax", ax, field_words);
+            ax[1] = {0};
+            ax[2] = {0};
+            ax[3] = {0};
+            i_th_ele_in_span(bx_temp, eval_basis, basis_len - r, global_query_indices.b_indices[s]);
+            field_add(bx, &offset, bx_temp, field_words);
+            print_field("bx", bx, field_words);
+            bx[1] = {0};
+            bx[2] = {0};
+            bx[3] = {0};
             memcpy(cx, alpha, FIELD_WORDS * sizeof(uint64_t));
             field_sub(diff1, ay[s], by[s], field_words);
+            print_field("diff1", diff1, field_words);
             field_sub(diff2, ax, bx, field_words);
             field_inv(temp1, diff2, field_words);
             memcpy(alpha_offset, ax, sizeof(uint64_t));
-            field_sub(temp2, cx, alpha_offset, field_words);
-            field_mul(temp3, temp2, &denominator_inv[0], field_words);
+            field_sub(temp2, cx, ax, field_words);
+            print_field("cx", cx, field_words);
+            print_field("temp2", temp2, field_words);
+            field_mul(temp3, temp2, denominator_inv, field_words);
+            print_field("temp3", temp3, field_words);
             field_mul(temp4, temp3, diff1, field_words);
+            print_field("temp4", temp4, field_words);
             field_add(temp5, temp4, ay[s], field_words);
-            if (memcmp(cy[s], temp5, field_words * sizeof(uint64_t)) != 0) {
+            print_field("temp5", temp5, field_words);
+            if (memcmp(cy[s], temp5, field_words * sizeof(uint64_t))!= 0) {
                 printf("Colinearity check failed\n");
                 printf("%d\n", memcmp(cy[s], temp5, field_words * sizeof(uint64_t)));
                 free(aa);
@@ -909,9 +942,9 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
                 //free(root_verify);
                 //free(alpha);
                 for (int j = 0; j < last_domain.size; j++) {
-                    free(domain_elements[j]);
+                    free(last_domain_elements[j]);
                 }
-                free(domain_elements);
+                free(last_domain_elements);
                 return 0;
             }
 
@@ -920,7 +953,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
             for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
                 auth_path_a[i] = (uint64_t *)malloc(HASH_SIZE);  // Allocate space for each hash
             }
-            size_t proof_len_a, proof_len_b, proof_len_c;
+            size_t proof_len_a = 0, proof_len_b = 0, proof_len_c = 0;
             size_t *proof_len_ptr_a = (size_t *)pull_object(global_proof_stream);
             pull_count++;
             proof_len_a = *proof_len_ptr_a;
@@ -946,9 +979,9 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
                 free(cc);
                 free(root_verify);
                 for (int j = 0; j < last_domain.size; j++) {
-                    free(domain_elements[j]);
+                    free(last_domain_elements[j]);
                 }
-                free(domain_elements);
+                free(last_domain_elements);
                 return 0;
             }
 
@@ -973,9 +1006,9 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
                 //free(roots);
                 //free(alphas);
                 for (int j = 0; j < last_domain.size; j++) {
-                    free(domain_elements[j]);
+                    free(last_domain_elements[j]);
                 }
-                free(domain_elements);
+                free(last_domain_elements);
                 return 0;
             }
 
@@ -1000,9 +1033,9 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
                 //free(roots);
                 //free(alphas);
                 for (int j = 0; j < last_domain.size; j++) {
-                    free(domain_elements[j]);
+                    free(last_domain_elements[j]);
                 }
-                free(domain_elements);
+                free(last_domain_elements);
                 return 0;
             }
         }
@@ -1054,7 +1087,7 @@ void test_fri(){
         uint64_t temp[field_words];
         i_th_ele_in_span(temp, eval_basis, MAX_EVAL_BASIS_LEN, i);
         //print_field("temp", temp, FIELD_WORDS);
-        field_add(domain_elements[i], offset, temp, field_words);
+        field_add(domain_elements[i], &offset, temp, field_words);
         //print_field("domain_elements[i]", domain_elements[i], FIELD_WORDS);
     }
     // Evaluate polynomial over the domain
@@ -1103,14 +1136,14 @@ void test_fri(){
         memcpy(points_x[i], points[2 * i], FIELD_WORDS * sizeof(uint64_t));
         memcpy(points_y[i], points[2 * i + 1], FIELD_WORDS * sizeof(uint64_t));
     }
-
+    int max_basis_len = sizeof(preon.fri_domains) / sizeof(preon.fri_domains[0]);
     for (int i = 0; i < 13; i++) {
         uint64_t temp[FIELD_WORDS];
         i_th_ele_in_span(temp, eval_basis, MAX_EVAL_BASIS_LEN, i);
-        field_add(temp, offset, temp, field_words);
+        field_add(temp, &offset, temp, field_words);
 
         uint64_t eval_result[FIELD_WORDS];
-        poly_eval(eval_result, poly_coeffs, BASIS_SIZE, temp, field_words);
+        poly_eval(eval_result, poly_coeffs, max_basis_len, temp, field_words);
 
         if (!field_equal(eval_result, points_y[i], FIELD_WORDS)) {
             printf("Polynomial evaluates to wrong value\n");
