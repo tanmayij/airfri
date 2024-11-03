@@ -19,6 +19,9 @@
 ProofStream* global_proof_stream = NULL;
 QueryIndices global_query_indices;
 uint64_t *tree = (uint64_t *)malloc((2 * num_leaves - 1) * (CONCAT_WORDS) * sizeof(uint64_t)); //merkle tree data 
+// uint64_t *tree_initial_leaf = (uint64_t *)malloc(NUM_LEAVES * FIELD_WORDS * sizeof(uint64_t));
+// uint64_t *tree_concat_words = (uint64_t *)malloc((NUM_LEAVES - 32) * CONCAT_WORDS * sizeof(uint64_t));
+// uint64_t *tree_hash_words = (uint64_t *)malloc( ((NUM_LEAVES >> 12) - 1) * HASH_WORDS * sizeof(uint64_t));
 // typedef struct {
 //     size_t size;
 //     size_t basis_len;
@@ -484,7 +487,6 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len)
     memcpy(sampled_alpha_for_proofstream, sampled_alpha, FIELD_WORDS * sizeof(uint64_t));
 
     uint64_t *root = (uint64_t *)malloc(HASH_WORDS * sizeof(uint64_t)); //32 bytes for merkle tree hash
-
     for(int r = 0; r < fri_num_rounds(fri); r++){
         uint64_t *eval_basis = populate_eval_basis(basis_len - r);
         if (eval_basis != NULL) {
@@ -519,13 +521,19 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len)
         denominator_inv = precomputed_inverses[exponent + r]; 
         printf("denominator inverse %016lx\n", denominator_inv);
         uint64_t **codeword_nxt = (uint64_t **)malloc((N/2)*sizeof(uint64_t *)); 
-
+        for (int i = 0; i < N/2; i++){
+            codeword_nxt[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
+        }
         commit_launch(codeword, codeword_nxt, alpha, &offset, denominator_inv, eval_basis, N, root, tree);
         if(N > 32) {
         N = N / 2;
         codeword = codeword_nxt;
         codeword_len = codeword_len /2;
         }
+        // for (int i = 0; i < N/2; i++){
+        //     free(codeword_nxt[i]);
+        // }
+        // free(codeword_nxt);
     }
     push_object(global_proof_stream, root);
     push_count++;
@@ -595,9 +603,9 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         size_t proof_len_a = 0;
         uint64_t **auth_path_a = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
         size_t *proof_len_ptr_a = (size_t *)malloc(sizeof(size_t));
-        // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
-        // auth_path_a[i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));  
-        // }
+        for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
+        auth_path_a[i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));  
+        }
         merkle_open(auth_path_a, global_query_indices.a_indices[s], &proof_len_a, tree);
         *proof_len_ptr_a = proof_len_a;
         push_object(global_proof_stream, proof_len_ptr_a);
@@ -1079,6 +1087,7 @@ void test_fri(){
     int num_colinearity_tests = 13;
 
     int initial_domain_length = (degree + 1) * expansion_factor;
+    printf("initial domain length test_fri: %d\n", initial_domain_length);
     int log_codeword_length = (int)log2(initial_domain_length);
     int basis_len = log_codeword_length;
     uint64_t *eval_basis = populate_eval_basis(basis_len);
@@ -1115,7 +1124,7 @@ void test_fri(){
 
     for (int i = 0; i < initial_domain_length; i++) {
         codeword[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
-        // print_field("codeword value in test_fri", codeword[i], field_words);
+        //print_field("codeword value in test_fri", codeword[i], field_words);
         // int is = is_zero(codeword[i], field_words);
     }
 
@@ -1125,10 +1134,11 @@ void test_fri(){
     // Test valid codeword
     printf("Testing valid codeword ...\n");
     printf("Calling prove\n");
-
+    // for (int i = 0; i < initial_domain_length; i++) {
+    // print_field("codeword value in test_fri", codeword[i], field_words);
+    // }
     prove(fri, codeword);
     printf("Returned from prove for valid codeword\n");
-
     //size_t num_points = 0;
     //what are these? this is the degree of the polynomial that professor was talking about?
     uint64_t *points[32768];

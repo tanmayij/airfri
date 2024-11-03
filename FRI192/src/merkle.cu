@@ -471,36 +471,111 @@ void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t
         current_index /= 2;
     }
 }
+// void merkle_open(
+//     uint64_t **auth_path,          // 2D array to store the sibling hashes at each layer
+//     int leaf_idx,                  // Index of the leaf for which the path is generated
+//     size_t *proof_len,             // Will store the length of the proof path
+//     uint64_t *tree_initial_leaf,   // Array holding the initial codeword elements
+//     uint64_t *tree_concat_words,   // Array for nodes that are CONCAT_WORDS-sized (codeword || hash)
+//     uint64_t *tree_hash_words,     // Array for nodes that are only HASH_WORDS-sized
+//     size_t num_layers              // Number of layers in the tree
+// ) {
+//     int current_index = leaf_idx;
+//     *proof_len = 0;
 
-int merkle_verify(uint64_t *root, size_t index, uint64_t **auth_path, size_t proof_len, uint64_t *leaf) {
+//     // Traverse up the tree, layer by layer
+//     for (size_t layer = 0; layer < num_layers; ++layer) {
+//         int sibling_index = (current_index % 2 == 0) ? current_index + 1 : current_index - 1;
+
+//         // Select the correct tree array based on the layer type
+//         if (layer == 0) {  // First layer with codewords only
+//             auth_path[*proof_len] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
+//             memcpy(auth_path[*proof_len], &tree_initial_leaf[sibling_index * FIELD_WORDS], FIELD_WORDS * sizeof(uint64_t));
+//         } else if (layer < num_layers - 5) {  // Middle layers with CONCAT_WORDS (codeword || hash)
+//             auth_path[*proof_len] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));
+//             memcpy(auth_path[*proof_len], &tree_concat_words[sibling_index * CONCAT_WORDS], CONCAT_WORDS * sizeof(uint64_t));
+//         } else {  // Last layers with HASH_WORDS only
+//             auth_path[*proof_len] = (uint64_t *)malloc(HASH_WORDS * sizeof(uint64_t));
+//             memcpy(auth_path[*proof_len], &tree_hash_words[(sibling_index - (1 << (num_layers - 5))) * HASH_WORDS], HASH_WORDS * sizeof(uint64_t));
+//         }
+
+//         (*proof_len)++;
+//         current_index /= 2;  // Move up to the parent node
+//     }
+// }
+
+// int merkle_verify(uint64_t *root, size_t index, uint64_t **auth_path, size_t proof_len, uint64_t *leaf) {
+//     uint64_t computed_hash[HASH_WORDS];
+//     memcpy(computed_hash, leaf, FIELD_WORDS * sizeof(uint64_t));
+
+//     for (size_t i = 0; i < proof_len; ++i) {
+//         uint64_t combined[CONCAT_WORDS];
+
+//         if (index % 2 == 0) {
+//             // Left node: concatenate computed hash with the proof path element
+//             memcpy(combined, computed_hash, HASH_WORDS * sizeof(uint64_t));
+//             memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
+//         } else {
+//             // Right node: concatenate proof path element with the computed hash
+//             memcpy(combined, auth_path[i], HASH_WORDS * sizeof(uint64_t));
+//             memcpy(combined + HASH_WORDS, computed_hash, HASH_WORDS * sizeof(uint64_t));
+//         }
+
+//         // Recompute hash
+//         SHA3_host((uint8_t *)computed_hash, (uint8_t *)combined, CONCAT_WORDS * sizeof(uint64_t), 256);
+//         index /= 2;
+
+//         // Print each computed hash for debugging
+//         printf("Layer %zu: Computed hash = ", i);
+//         for (size_t j = 0; j < HASH_WORDS; ++j) {
+//             printf("%016lx ", computed_hash[j]);
+//         }
+//         printf("\n");
+//     }
+
+//     // Final comparison with the root
+//     return memcmp(computed_hash, root, HASH_WORDS * sizeof(uint64_t)) == 0;
+// }
+int merkle_verify(
+    uint64_t *root,            // Expected Merkle root to verify against
+    size_t leaf_idx,           // Index of the leaf being verified
+    uint64_t **auth_path,      // Authentication path (sibling hashes) for the leaf
+    size_t proof_len,          // Length of the proof path
+    uint64_t *leaf             // Initial leaf (codeword element) to start the verification
+) {
     uint64_t computed_hash[HASH_WORDS];
     memcpy(computed_hash, leaf, FIELD_WORDS * sizeof(uint64_t));
+
+    size_t current_idx = leaf_idx;
 
     for (size_t i = 0; i < proof_len; ++i) {
         uint64_t combined[CONCAT_WORDS];
 
-        if (index % 2 == 0) {
-            // Left node: concatenate computed hash with the proof path element
-            memcpy(combined, computed_hash, HASH_WORDS * sizeof(uint64_t));
-            memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
-        } else {
-            // Right node: concatenate proof path element with the computed hash
-            memcpy(combined, auth_path[i], HASH_WORDS * sizeof(uint64_t));
-            memcpy(combined + HASH_WORDS, computed_hash, HASH_WORDS * sizeof(uint64_t));
+        if (i < proof_len - 5) {  // Middle layers with CONCAT_WORDS
+            if (current_idx % 2 == 0) {
+                memcpy(combined, computed_hash, HASH_WORDS * sizeof(uint64_t));
+                memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
+            } else {
+                memcpy(combined, auth_path[i], HASH_WORDS * sizeof(uint64_t));
+                memcpy(combined + HASH_WORDS, computed_hash, HASH_WORDS * sizeof(uint64_t));
+            }
+        } else {  // Last layers with HASH_WORDS
+            if (current_idx % 2 == 0) {
+                memcpy(combined, computed_hash, HASH_WORDS * sizeof(uint64_t));
+                memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
+            } else {
+                memcpy(combined, auth_path[i], HASH_WORDS * sizeof(uint64_t));
+                memcpy(combined + HASH_WORDS, computed_hash, HASH_WORDS * sizeof(uint64_t));
+            }
         }
 
-        // Recompute hash
+        // Compute the hash for this layer
         SHA3_host((uint8_t *)computed_hash, (uint8_t *)combined, CONCAT_WORDS * sizeof(uint64_t), 256);
-        index /= 2;
 
-        // Print each computed hash for debugging
-        printf("Layer %zu: Computed hash = ", i);
-        for (size_t j = 0; j < HASH_WORDS; ++j) {
-            printf("%016lx ", computed_hash[j]);
-        }
-        printf("\n");
+        // Move up to the parent node
+        current_idx /= 2;
     }
 
-    // Final comparison with the root
+    // Final comparison with the provided root
     return memcmp(computed_hash, root, HASH_WORDS * sizeof(uint64_t)) == 0;
 }

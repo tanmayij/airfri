@@ -67,9 +67,23 @@ void print_bytes(const uint64_t *bytes, size_t size);
 //Function to compute the Merkle root from leaf hashes
 void merkle_commit(uint64_t **leaf_hashes, size_t num_leaves, uint64_t *out);
 
-
 void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t *host_concatenated_tree);
+// void merkle_open(
+//     uint64_t **auth_path,          // 2D array to store the sibling hashes at each layer
+//     int leaf_idx,                  // Index of the leaf for which the path is generated
+//     size_t *proof_len,             // Will store the length of the proof path
+//     uint64_t *tree_initial_leaf,   // Array holding the initial codeword elements
+//     uint64_t *tree_concat_words,   // Array for nodes that are CONCAT_WORDS-sized (codeword || hash)
+//     uint64_t *tree_hash_words,     // Array for nodes that are only HASH_WORDS-sized
+//     size_t num_layers              // Number of layers in the tree
+// );
 
-int merkle_verify(uint64_t *root, size_t index, uint64_t **auth_path, size_t proof_len, uint64_t *leaf);
+int merkle_verify(
+    uint64_t *root,            // Expected Merkle root to verify against
+    size_t leaf_idx,           // Index of the leaf being verified
+    uint64_t **auth_path,      // Authentication path (sibling hashes) for the leaf
+    size_t proof_len,          // Length of the proof path
+    uint64_t *leaf             // Initial leaf (codeword element) to start the verification
+);
 
 #endif // MERKLE_H

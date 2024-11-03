@@ -81,7 +81,7 @@ __global__ void commit_kernel(
 
     uint64_t combined[2 * HASH_WORDS];
     uint8_t digest[HASH_SIZE];
-    if (I < N / 2 && N == 8) { //hardcoded for now
+    if (I < N / 2 && N == 131072) { //hardcoded for now
         memcpy(combined, &device_codeword[idx1], FIELD_WORDS * sizeof(uint64_t));  
         memcpy(combined + FIELD_WORDS, &device_codeword[idx2], FIELD_WORDS * sizeof(uint64_t));  
         SHA3(digest, (uint8_t *)combined, (FIELD_WORDS + FIELD_WORDS) * sizeof(uint64_t), 256);
@@ -90,7 +90,7 @@ __global__ void commit_kernel(
     }
     __syncthreads();
 
-    for (int layer = 1; layer < 3; layer++) {
+    for (int layer = 1; layer < 12; layer++) { //12 is num_rounds
         if (I < (N / (2 * (1 << layer)))) {
             int codeword_idx = (1 << layer) * idx3;
             memcpy(combined, &device_layer_hashes[(I * 2) * HASH_WORDS], HASH_WORDS * sizeof(uint64_t));
@@ -139,7 +139,6 @@ __global__ void merkle_kernel(
         layer++;
     }
 
-    // Assign the root hash to the output only once, when N == 1
     if (I == 0) {
         memcpy(device_merkle_root, device_layer_hashes, HASH_SIZE);
         printf("Final Merkle root: ");
@@ -354,3 +353,217 @@ void commit_launch(
 
     printf("Memory freed and commit_launch completed.\n");
 }
+
+// #include <cuda_runtime.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <stdint.h>
+// #include <string.h>
+// #include "../include/commit-launch-merkle.cuh"
+// #include "../include/hash.cuh"
+// #include "../include/field.cuh"
+// #define FIELD_WORDS 4
+// // Constants
+// // const size_t CONCAT_WORDS = FIELD_WORDS + HASH_WORDS;
+// const int NUM_LAYERS = 12;  // Maximum number of layers in the Merkle tree
+
+// // Helper functions for debugging
+// __device__ void print_field_kernel(const char *label, const uint64_t *field, int field_words) {
+//     printf("%s: ", label);
+//     for (int i = 0; i < field_words; i++) {
+//         printf("%016lx ", field[i]);
+//     }
+//     printf("\n");
+// }
+
+// __host__ void print_field_host(const char *label, const uint64_t *field, int field_words) {
+//     printf("%s: ", label);
+//     for (int i = 0; i < field_words; i++) {
+//         printf("%016lx ", field[i]);
+//     }
+//     printf("\n");
+// }
+
+// // Kernel for creating codeword concatenations
+// __global__ void commit_kernel(
+//     uint64_t *device_codeword, uint64_t *device_codeword_nxt,
+//     uint64_t *device_alpha, uint64_t *device_offset,
+//     uint64_t *device_denominator_inv, uint64_t *device_eval_basis,
+//     uint64_t *device_temp1, uint64_t *device_temp2,
+//     uint64_t *device_temp3, uint64_t *device_temp4,
+//     uint64_t *device_temp5, uint64_t *device_alpha_offset, 
+//     uint64_t *tree_initial_leaf, uint64_t *tree_concat_words,
+//     int N, int basis_len
+// ) {
+//     size_t I = blockIdx.x * blockDim.x + threadIdx.x;
+
+//     if (I >= N / 2) return;
+
+//     int idx1 = 2 * I * FIELD_WORDS;
+//     int idx2 = (2 * I + 1) * FIELD_WORDS;
+//     int idx3 = I * FIELD_WORDS;
+
+//     // Compute codeword next elements
+//     field_sub(&device_temp1[idx3], &device_codeword[idx1], &device_codeword[idx2], FIELD_WORDS);
+//     i_th_ele_in_span(&device_alpha_offset[idx3], device_eval_basis, basis_len, 2 * I);
+//     field_addEqual(&device_alpha_offset[idx3], device_offset, FIELD_WORDS); 
+//     field_sub(&device_temp2[idx3], device_alpha, &device_alpha_offset[idx3], FIELD_WORDS);
+//     field_mul(&device_temp3[idx3], &device_temp2[idx3], device_denominator_inv, FIELD_WORDS);
+//     field_mul(&device_temp4[idx3], &device_temp3[idx3], &device_temp1[idx3], FIELD_WORDS);
+//     field_add(&device_temp5[idx3], &device_temp4[idx3], &device_codeword[idx1], FIELD_WORDS);
+//     memcpy(&device_codeword_nxt[idx3], &device_temp5[idx3], FIELD_WORDS * sizeof(uint64_t));
+
+//     // Copy initial codeword elements to `tree_initial_leaf`
+//     if (N == 131072) {  // for the first round
+//         memcpy(&tree_initial_leaf[idx1], &device_codeword[idx1], FIELD_WORDS * sizeof(uint64_t));
+//         memcpy(&tree_initial_leaf[idx2], &device_codeword[idx2], FIELD_WORDS * sizeof(uint64_t));
+//     }
+
+//     // Compute concatenated codeword elements with hashes
+//     uint64_t combined[CONCAT_WORDS];
+//     uint8_t digest[HASH_SIZE];
+//     memcpy(combined, &device_codeword[idx1], FIELD_WORDS * sizeof(uint64_t));
+//     memcpy(combined + FIELD_WORDS, &device_codeword[idx2], FIELD_WORDS * sizeof(uint64_t));
+//     SHA3(digest, (uint8_t *)combined, CONCAT_WORDS * sizeof(uint64_t), 256);
+
+//     // Copy combined elements to `tree_concat_words`
+//     memcpy(&tree_concat_words[idx3], combined, CONCAT_WORDS * sizeof(uint64_t));
+// }
+
+// // Kernel for storing only hashes at higher layers
+// __global__ void merkle_kernel(
+//     uint64_t *device_layer_hashes, 
+//     uint64_t *device_merkle_root, 
+//     uint64_t *tree_hash_words, 
+//     int N
+// ) {
+//     int I = blockIdx.x * blockDim.x + threadIdx.x;
+//     int layer = 0;
+
+//     // Traverse up the tree and store only hashes in `tree_hash_words`
+//     while (N > 1) {
+//         if (I < N / 2) {
+//             uint64_t combined[2 * HASH_WORDS];
+//             uint8_t digest[HASH_SIZE];
+
+//             // Combine hashes from the current layer
+//             memcpy(combined, &device_layer_hashes[(2 * I) * HASH_WORDS], HASH_WORDS * sizeof(uint64_t));
+//             memcpy(combined + HASH_WORDS, &device_layer_hashes[(2 * I + 1) * HASH_WORDS], HASH_WORDS * sizeof(uint64_t));
+
+//             // Hash the combined result
+//             SHA3(digest, (uint8_t *)combined, 2 * HASH_WORDS * sizeof(uint64_t), 256);
+
+//             // Store in tree_hash_words and update layer hash
+//             int concat_index = layer * N / 2 + I;
+//             memcpy(&tree_hash_words[concat_index * HASH_WORDS], digest, HASH_WORDS * sizeof(uint64_t));
+//             memcpy((uint8_t *)&device_layer_hashes[I * HASH_WORDS], digest, HASH_SIZE);
+//         }
+
+//         __syncthreads();
+//         N /= 2;
+//         layer++;
+//     }
+
+//     // Set the root in `device_merkle_root` when at the top layer
+//     if (I == 0) {
+//         memcpy(device_merkle_root, device_layer_hashes, HASH_SIZE);
+//     }
+// }
+
+// // Host function to initialize memory and launch kernels
+// void commit_launch(
+//     uint64_t **codeword, uint64_t **codeword_nxt, 
+//     uint64_t *alpha, uint64_t *offset, 
+//     uint64_t denominator_inv, uint64_t *eval_basis, 
+//     int N, uint64_t *root,
+//     uint64_t *tree_initial_leaf, uint64_t *tree_concat_words, uint64_t *tree_hash_words
+// ) {
+//     printf("Starting commit_launch\n");
+//     int basis_len = (int)log2(N);
+
+//     // Flatten codewords and allocate device memory
+//     uint64_t *flattened_codeword = (uint64_t *)malloc(N * FIELD_WORDS * sizeof(uint64_t));
+//     for (int i = 0; i < N; ++i) {
+//         for (int j = 0; j < FIELD_WORDS; ++j) {
+//             int index = i * FIELD_WORDS + j;
+//             flattened_codeword[index] = codeword[i][j];
+//         }
+//     }
+
+//     // Memory allocations for device variables
+//     uint64_t *device_codeword, *device_codeword_nxt, *device_alpha, *device_offset;
+//     uint64_t *device_denominator_inv, *device_eval_basis;
+//     uint64_t *device_temp1, *device_temp2, *device_temp3, *device_temp4, *device_temp5, *device_alpha_offset;
+//     uint64_t *device_layer_hashes, *device_merkle_root, *device_tree_initial_leaf, *device_tree_concat_words, *device_tree_hash_words;
+
+//     cudaMalloc((void**)&device_codeword, N * FIELD_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_codeword_nxt, N / 2 * FIELD_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_alpha, FIELD_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_offset, FIELD_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_denominator_inv, sizeof(uint64_t));
+//     cudaMalloc((void**)&device_eval_basis, basis_len * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_temp1, N / 2 * FIELD_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_temp2, N / 2 * FIELD_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_temp3, N / 2 * FIELD_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_temp4, N / 2 * FIELD_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_temp5, N / 2 * FIELD_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_alpha_offset, N / 2 * FIELD_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_layer_hashes, N * HASH_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_merkle_root, HASH_SIZE);
+//     cudaMalloc((void**)&device_tree_initial_leaf, N * FIELD_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_tree_concat_words, (N - 32) * CONCAT_WORDS * sizeof(uint64_t));
+//     cudaMalloc((void**)&device_tree_hash_words, ((N >> 12) - 1) * HASH_WORDS * sizeof(uint64_t));
+
+//     // Copy data to device
+//     cudaMemcpy(device_codeword, flattened_codeword, N * FIELD_WORDS * sizeof(uint64_t), cudaMemcpyHostToDevice);
+//     cudaMemcpy(device_alpha, alpha, FIELD_WORDS * sizeof(uint64_t), cudaMemcpyHostToDevice);
+//     cudaMemcpy(device_offset, offset, FIELD_WORDS * sizeof(uint64_t), cudaMemcpyHostToDevice);
+//     cudaMemcpy(device_denominator_inv, &denominator_inv, sizeof(uint64_t), cudaMemcpyHostToDevice);
+//     cudaMemcpy(device_eval_basis, eval_basis, basis_len * sizeof(uint64_t), cudaMemcpyHostToDevice);
+
+//     // Launch `commit_kernel` and `merkle_kernel`
+//     int threads_per_block = 256;
+//     int num_blocks = (N / 2 + threads_per_block - 1) / threads_per_block;
+
+//     commit_kernel<<<num_blocks, threads_per_block>>>(
+//         device_codeword, device_codeword_nxt, device_alpha, device_offset,
+//         device_denominator_inv, device_eval_basis, device_temp1, device_temp2,
+//         device_temp3, device_temp4, device_temp5, device_alpha_offset, 
+//         device_tree_initial_leaf, device_tree_concat_words, N, basis_len
+//     );
+//     cudaDeviceSynchronize();
+
+//     merkle_kernel<<<num_blocks, threads_per_block>>>(
+//         device_layer_hashes, device_merkle_root, device_tree_hash_words, N
+//     );
+//     cudaDeviceSynchronize();
+
+//     // Copy Merkle root and tree components back to host
+//     cudaMemcpy(root, device_merkle_root, HASH_SIZE, cudaMemcpyDeviceToHost);
+//     cudaMemcpy(tree_initial_leaf, device_tree_initial_leaf, N * FIELD_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
+//     cudaMemcpy(tree_concat_words, device_tree_concat_words, (N / 2) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
+//     cudaMemcpy(tree_hash_words, device_tree_hash_words, (N - 1) * HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
+
+//     // Free device memory
+//     cudaFree(device_codeword);
+//     cudaFree(device_codeword_nxt);
+//     cudaFree(device_alpha);
+//     cudaFree(device_offset);
+//     cudaFree(device_denominator_inv);
+//     cudaFree(device_eval_basis);
+//     cudaFree(device_temp1);
+//     cudaFree(device_temp2);
+//     cudaFree(device_temp3);
+//     cudaFree(device_temp4);
+//     cudaFree(device_temp5);
+//     cudaFree(device_alpha_offset);
+//     cudaFree(device_layer_hashes);
+//     cudaFree(device_merkle_root);
+//     cudaFree(device_tree_initial_leaf);
+//     cudaFree(device_tree_concat_words);
+//     cudaFree(device_tree_hash_words);
+
+//     free(flattened_codeword);
+
+//     printf("Memory freed and commit_launch completed.\n");
+// }

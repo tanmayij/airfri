@@ -17,7 +17,7 @@
 #include "../include/commit-launch-merkle.cuh"
 #include "../include/poly-eval-launch.cuh"
 
-int num_leaves = preon.fri_domains[5].size;
+int num_leaves = preon.fri_domains[3].size;
 #define NUM_LEAVES num_leaves
 #define MAX_PROOF_PATH_LENGTH ((int)log2(NUM_LEAVES)) //17
 int basis_size = 0;
