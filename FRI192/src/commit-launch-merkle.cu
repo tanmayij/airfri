@@ -120,19 +120,18 @@ __global__ void merkle_kernel(
         uint64_t combined[2 * HASH_WORDS];
         uint8_t digest[HASH_SIZE];
 
-        // Combine two hashes from the current layer
+        //combine two hashes from the current layer
         memcpy(combined, &device_layer_hashes[(2 * I) * HASH_WORDS], HASH_WORDS * sizeof(uint64_t));
         memcpy(combined + HASH_WORDS, &device_layer_hashes[(2 * I + 1) * HASH_WORDS], HASH_WORDS * sizeof(uint64_t));
 
-        // Hash the combined result to obtain the parent node
+        //hash the combined result to obtain the parent node
         SHA3(digest, (uint8_t *)combined, 2 * HASH_WORDS * sizeof(uint64_t), 256);
 
-        // Store the digest in the parent position in the next layer
+        //store the digest in the parent position in the next layer
         memcpy((uint8_t *)&device_layer_hashes[I * HASH_WORDS], digest, 32);
 
-        // // Store the combined hash values in `device_concatenated_tree` for this layer
-        // int concat_index = I * (2 * HASH_WORDS);
-        // memcpy(&device_concatenated_tree[concat_index], combined, 2 * HASH_WORDS * sizeof(uint64_t));
+        memcpy((uint8_t *)&device_tree_layer_nxt[I * HASH_WORDS], digest, HASH_SIZE);
+
     }
 
     if (I == 0 && N == 2) {
@@ -457,7 +456,7 @@ void commit_launch(
         }
         tree_idx++; 
         int next_N = N / 2;
-        for(int layer = tree_idx; layer <= 17; layer++){
+        for(int layer = tree_idx; layer <= 18; layer++){
             tree[layer] = (uint64_t **)malloc((next_N / 2) * sizeof(uint64_t *));
             for(int i = 0; i < next_N / 2; i++){
                 tree[layer][i] = (uint64_t *)malloc(2 * HASH_WORDS * sizeof(uint64_t));
