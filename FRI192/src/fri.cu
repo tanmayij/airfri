@@ -18,7 +18,8 @@
 #define FIELD_WORDS 4
 ProofStream* global_proof_stream = NULL;
 QueryIndices global_query_indices;
-uint64_t *tree = (uint64_t *)malloc((2 * num_leaves - 1) * (CONCAT_WORDS) * sizeof(uint64_t)); //merkle tree data 
+//uint64_t *tree = (uint64_t *)malloc((264143) * (CONCAT_WORDS) * sizeof(uint64_t)); //merkle tree data 
+uint64_t ***tree = (uint64_t ***)malloc(MAX_PROOF_PATH_LENGTH + 1 * sizeof(uint64_t **)); //three types of layers, 18 layers including root
 // uint64_t *tree_initial_leaf = (uint64_t *)malloc(NUM_LEAVES * FIELD_WORDS * sizeof(uint64_t));
 // uint64_t *tree_concat_words = (uint64_t *)malloc((NUM_LEAVES - 32) * CONCAT_WORDS * sizeof(uint64_t));
 // uint64_t *tree_hash_words = (uint64_t *)malloc( ((NUM_LEAVES >> 12) - 1) * HASH_WORDS * sizeof(uint64_t));
@@ -441,7 +442,7 @@ void cleanup_indices_tracker() {
 
 /* ======== COMMIT PHASE ======== */
 
-uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len)
+uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_t **tree_layer)
 {
     const int max_fri_domains = sizeof(preon.fri_domains) / sizeof(preon.fri_domains[0]); //should be 16 for 256-bit params 
     int basis_len = fri_log_domain_length(fri); //basis length of initial codeword 
@@ -485,7 +486,6 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len)
     printf("\n");
     uint64_t *sampled_alpha_for_proofstream = (uint64_t *) malloc (FIELD_WORDS * sizeof(uint64_t));
     memcpy(sampled_alpha_for_proofstream, sampled_alpha, FIELD_WORDS * sizeof(uint64_t));
-
     uint64_t *root = (uint64_t *)malloc(HASH_WORDS * sizeof(uint64_t)); //32 bytes for merkle tree hash
     for(int r = 0; r < fri_num_rounds(fri); r++){
         uint64_t *eval_basis = populate_eval_basis(basis_len - r);
@@ -513,21 +513,27 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len)
             printf("%016lx ", alpha[i]);
         }
         printf("\n");
-
+        // for(int i = 0; i < N/2; i++){
+        //     uint64_t next_layer_hash_codeword[i] = (uint64_t *)malloc((FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
+        // }
         codewords[r] = codeword;
+        tree[r] = tree_layer;
         int exponent = preon.fri_domains[0].basis_len - fri_log_domain_length(fri);
         printf("preon.fri_domains[0].basis_len: %d\n", preon.fri_domains[0].basis_len);
         uint64_t denominator_inv = 0;
         denominator_inv = precomputed_inverses[exponent + r]; 
         printf("denominator inverse %016lx\n", denominator_inv);
         uint64_t **codeword_nxt = (uint64_t **)malloc((N/2)*sizeof(uint64_t *)); 
+        uint64_t **tree_layer_nxt = (uint64_t **)malloc(N/2 *sizeof(uint64_t *));
         for (int i = 0; i < N/2; i++){
             codeword_nxt[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
+            tree_layer_nxt[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
         }
-        commit_launch(codeword, codeword_nxt, alpha, &offset, denominator_inv, eval_basis, N, root, tree);
+        commit_launch(codeword, codeword_nxt, alpha, &offset, denominator_inv, eval_basis, N, root, tree_layer, tree_layer_nxt, tree);
         if(N > 32) {
         N = N / 2;
         codeword = codeword_nxt;
+        tree_layer = tree_layer_nxt;
         codeword_len = codeword_len /2;
         }
         // for (int i = 0; i < N/2; i++){
@@ -546,6 +552,11 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len)
         printf("%016lx ", root[i]);
     }
     printf("\n");
+    printf("Checking if tree[17] has Root of FRI:\n");
+    for (size_t i = 0; i < HASH_WORDS; i++) {  
+        printf("%016lx ", tree[17][0][i]);
+    }
+    printf("\n");
     printf("Push successful\n");
     //push the last codeword and store it
     for (int i =0; i < N; i ++) {
@@ -553,13 +564,42 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len)
     push_count++;
     }
     codewords[fri_num_rounds(fri)] = codeword;
-
+    
     //debugging information
     print_codeword(codewords[fri_num_rounds(fri)], N, field_words);
     printf("Last codeword length N:%zu", N);
 
     //return the last codeword
     return codewords;
+}
+
+void print_tree(uint64_t ***tree, int num_layers) {
+    int elements_per_layer = 5; // Starting with 2^17 for the first codeword layer
+
+    for (int layer = 0; layer < num_layers; layer++) {
+        printf("Layer %d:\n", layer);
+        
+        int words_per_element;
+        if (layer == 0) {
+            words_per_element = FIELD_WORDS; // Only codeword elements
+        } else if (layer < 13) {
+            words_per_element = FIELD_WORDS + HASH_WORDS; // Codeword + hash for intermediate layers
+        } else {
+            words_per_element = HASH_WORDS; // Only hashes for Merkle tree layers
+        }
+
+        int elements_to_print = (elements_per_layer > 10) ? 10 : elements_per_layer; // Print up to 10 elements for readability
+        for (int i = 0; i < elements_to_print; i++) {
+            printf("Element %d: ", i);
+            for (int j = 0; j < words_per_element; j++) {
+                printf("%016lx ", tree[layer][i][j]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+        
+        elements_per_layer /= 2; // Halve the number of elements for the next layer
+    }
 }
 
 /* ======== QUERY PHASE ======== */
@@ -677,15 +717,17 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
     return c_indices;
 }
 
-size_t* prove(Fri* fri, uint64_t **codeword) {
+size_t* prove(Fri* fri, uint64_t **codeword, uint64_t **tree_layer) {
     initialize_indices_tracker(fri);
 
     size_t codeword_length = 0;
     while (codeword[codeword_length] != NULL) codeword_length++;
 
     global_proof_stream = create_proof_stream();
-    uint64_t ***codewords = commit_host(fri, codeword, codeword_length);
+    uint64_t ***codewords = commit_host(fri, codeword, codeword_length, tree_layer);
 
+    //pree some tree elements
+    print_tree(tree, 17);
     size_t num_bytes = 32; 
     uint8_t *seed = prover_fiat_shamir(global_proof_stream, num_bytes); 
     //Initialize space for top-level and reduced indices
@@ -1121,9 +1163,10 @@ void test_fri(){
     }
     // Evaluate polynomial over the domain
     uint64_t **codeword = (uint64_t **)malloc(initial_domain_length * sizeof(uint64_t *));
-
+    uint64_t **tree_layer = (uint64_t **)malloc(initial_domain_length * sizeof(uint64_t *));
     for (int i = 0; i < initial_domain_length; i++) {
         codeword[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
+        tree_layer[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
         //print_field("codeword value in test_fri", codeword[i], field_words);
         // int is = is_zero(codeword[i], field_words);
     }
@@ -1131,13 +1174,16 @@ void test_fri(){
     parallel_poly_eval(codeword, poly_coeffs, 32, domain_elements, FIELD_WORDS, initial_domain_length);
     printf("Codeword length: %d\n", initial_domain_length);
 
+    for (int i = 0; i < initial_domain_length; i++) {
+        memcpy(tree_layer[i], codeword[i], FIELD_WORDS * sizeof(uint64_t));
+    }
     // Test valid codeword
     printf("Testing valid codeword ...\n");
     printf("Calling prove\n");
     // for (int i = 0; i < initial_domain_length; i++) {
     // print_field("codeword value in test_fri", codeword[i], field_words);
     // }
-    prove(fri, codeword);
+    prove(fri, codeword, tree_layer);
     printf("Returned from prove for valid codeword\n");
     //size_t num_points = 0;
     //what are these? this is the degree of the polynomial that professor was talking about?
@@ -1190,7 +1236,7 @@ void test_fri(){
     }
 
     printf("Calling prove for invalid codeword\n");
-    prove(fri, codeword);
+    prove(fri, codeword, tree_layer);
     printf("Returned from prove for invalid codeword\n");
 
     if (verify(fri, points, degree) != 0) {

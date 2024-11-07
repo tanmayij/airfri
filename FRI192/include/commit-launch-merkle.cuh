@@ -55,6 +55,7 @@
 #include <stdio.h>
 #include "../include/field.cuh"
 #include "../include/hash.cuh"
+#include "../include/hash-host.cuh"
 #define MAX_EVAL_BASIS_LEN 20
 #define MAX_FRI_PARAMETERS 16
 #define HASH_WORDS 4
@@ -73,22 +74,31 @@ __global__ void commit_kernel(
     uint64_t *device_temp1, uint64_t *device_temp2,
     uint64_t *device_temp3, uint64_t *device_temp4,
     uint64_t *device_temp5, uint64_t *device_alpha_offset, 
-    uint64_t *device_layer_hashes, uint64_t *device_concatenated_tree, int N, int basis_len
+    uint64_t *device_layer_hashes, uint64_t *device_tree_layer, uint64_t *device_tree_layer_nxt, int N, int basis_len
 );
 
 __global__ void merkle_kernel(
     uint64_t *device_layer_hashes, 
     uint64_t *device_merkle_root, 
-    uint64_t *device_concatenated_tree, 
+    uint64_t *device_tree_layer,
+    uint64_t *device_tree_layer_nxt,
     int N
+);
+__global__ void final_layer_concat_and_hash_kernel(
+    uint64_t *device_codeword_nxt,      // Device array of final layer codeword elements
+    uint64_t *device_layer_hashes,      // Device array to store the updated hashes
+    uint64_t *device_tree_layer, // Device array to store concatenated hash values
+    uint64_t *device_tree_layer_nxt,
+    int num_elements                    // Number of elements (N/2 == 32)
 );
 extern "C" {
     void commit_launch(
         uint64_t **codeword, uint64_t **codeword_nxt, 
         uint64_t *alpha, uint64_t *offset, 
         uint64_t denominator_inv, uint64_t *eval_basis, 
-        int N, uint64_t *root, uint64_t *tree
+        int N, uint64_t *root, uint64_t **tree_layer, uint64_t **tree_layer_nxt, uint64_t ***tree
     );
+
 }
 __host__ __device__ void i_th_ele_in_span(uint64_t *result, uint64_t *basis, int len_basis, int i);
 
