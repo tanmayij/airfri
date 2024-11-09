@@ -82,15 +82,14 @@ __global__ void merkle_kernel(
     uint64_t *device_merkle_root, 
     uint64_t *device_tree_layer,
     uint64_t *device_tree_layer_nxt,
+    uint64_t *device_combined_sibling_codewords,
+    uint64_t *device_digest,
+    uint64_t *device_combined_sibling_hashes,
     int N
 );
-__global__ void final_layer_concat_and_hash_kernel(
-    uint64_t *device_codeword_nxt,      // Device array of final layer codeword elements
-    uint64_t *device_layer_hashes,      // Device array to store the updated hashes
-    uint64_t *device_tree_layer, // Device array to store concatenated hash values
-    uint64_t *device_tree_layer_nxt,
-    int num_elements                    // Number of elements (N/2 == 32)
-);
+__global__ void compute_tree_layers(uint64_t *device_codeword_nxt, uint64_t *device_layer_hashes, uint64_t *device_tree_layer,
+    uint64_t *device_tree_layer_nxt, uint64_t *device_combined_sibling_codewords, uint64_t *device_concat_codeword_to_hash, uint64_t *device_digest, int N);
+
 extern "C" {
     void commit_launch(
         uint64_t **codeword, uint64_t **codeword_nxt, 
