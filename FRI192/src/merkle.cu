@@ -86,37 +86,6 @@ bool is_sent(uint64_t *point, uint64_t **sent_points, size_t sent_count) {
     return false;
 }
 
-// void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t ***tree) {
-//     int current_index = leaf_idx;
-//     *proof_len = 0;  // Initialize proof_len to 0 and increment as we add layers
-
-//     // Traverse up the tree and collect sibling hashes
-//     while (current_index > 0) {
-//         int sibling_index;
-
-//         // Determine sibling index: if current index is even, sibling is current_index + 1; if odd, it's current_index - 1
-//         if (current_index % 2 == 0) {
-//             sibling_index = current_index + 1;
-//         } else {
-//             sibling_index = current_index - 1;
-//         }
-
-//         // Allocate space for the sibling hash in auth_path
-//         auth_path[*proof_len] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));
-
-//         // Copy the sibling hash from host_concatenated_tree to auth_path for the current layer
-//         memcpy(auth_path[*proof_len], 
-//                host_concatenated_tree + sibling_index * CONCAT_WORDS, 
-//                CONCAT_WORDS * sizeof(uint64_t));
-
-//         // Increment proof_len since we're adding one layer to the proof path
-//         (*proof_len)++;
-
-//         // Move up one level in the tree (integer division to find parent index)
-//         current_index /= 2;
-//     }
-// }
-
 void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t ***tree) {
     int current_index = leaf_idx;
     *proof_len = 0;
@@ -132,12 +101,13 @@ void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t
         } else {
             sibling_size = HASH_WORDS; 
         }
-        auth_path[*proof_len] = (uint64_t *)malloc(sibling_size * sizeof(uint64_t));
+        auth_path[*proof_len] = (uint64_t *)malloc((HASH_WORDS + sibling_size) * sizeof(uint64_t));
         if (!auth_path[*proof_len]) {
             fprintf(stderr, "Memory allocation failed for auth_path at proof_len %zu\n", *proof_len);
             exit(1);
         }
-        memcpy(auth_path[*proof_len], tree[layer][sibling_index], sibling_size * sizeof(uint64_t));
+        memcpy(auth_path[*proof_len], tree[layer][current_index], HASH_WORDS * sizeof(uint64_t)); //pick the hash from each index
+        memcpy(auth_path[*proof_len] + HASH_WORDS, tree[layer][sibling_index], sibling_size * sizeof(uint64_t));      //add sibling to it
         
         (*proof_len)++;
         current_index /= 2;
@@ -145,27 +115,24 @@ void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t
     }
 }
 
-
 // int merkle_verify(
-//     uint64_t *root,            // Expected Merkle root to verify against
-//     size_t leaf_idx,           // Index of the leaf being verified
-//     uint64_t **auth_path,      // Authentication path (sibling hashes) for the leaf
-//     size_t proof_len,          // Length of the proof path
-//     uint64_t *leaf             // Initial leaf (codeword element) to start the verification
+//     uint64_t *root,           // Expected Merkle root to verify against
+//     size_t leaf_idx,          // Index of the leaf being verified
+//     uint64_t **auth_path,     // Authentication path (sibling hashes) for the leaf
+//     size_t proof_len,         // Length of the proof path
+//     uint64_t *leaf            // Initial leaf (codeword element) to start the verification
 // ) {
 //     uint64_t computed_hash[HASH_WORDS];
-//     memcpy(computed_hash, leaf, FIELD_WORDS * sizeof(uint64_t));
+//     memcpy(computed_hash, leaf, FIELD_WORDS * sizeof(uint64_t)); 
 
 //     size_t current_idx = leaf_idx;
 
 //     for (size_t i = 0; i < proof_len; ++i) {
-//         uint64_t combined[CONCAT_WORDS];
-//         size_t concat_size;
+//         uint64_t combined[FIELD_WORDS + 2 * HASH_WORDS];
+//         size_t combined_size;
 
-//         // Determine the size of data to concatenate based on the layer depth
-//         if (i < proof_len - 4) {  // Lower layers (0 to 12) with CONCAT_WORDS
-//             concat_size = CONCAT_WORDS * sizeof(uint64_t);
-
+//         if (i == 0) {
+//             combined_size = FIELD_WORDS + HASH_WORDS;
 //             if (current_idx % 2 == 0) {
 //                 memcpy(combined, computed_hash, FIELD_WORDS * sizeof(uint64_t));
 //                 memcpy(combined + FIELD_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
@@ -173,9 +140,17 @@ void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t
 //                 memcpy(combined, auth_path[i], HASH_WORDS * sizeof(uint64_t));
 //                 memcpy(combined + HASH_WORDS, computed_hash, FIELD_WORDS * sizeof(uint64_t));
 //             }
-//         } else {  // Higher layers (13 to 16) with only HASH_WORDS
-//             concat_size = HASH_WORDS * sizeof(uint64_t);
-
+//         } else if (i < 13) {
+//             combined_size = FIELD_WORDS + HASH_WORDS;
+//             if (current_idx % 2 == 0) {
+//                 memcpy(combined, computed_hash, HASH_WORDS * sizeof(uint64_t));
+//                 memcpy(combined + HASH_WORDS, auth_path[i], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
+//             } else {
+//                 memcpy(combined, auth_path[i], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
+//                 memcpy(combined + FIELD_WORDS + HASH_WORDS, computed_hash, HASH_WORDS * sizeof(uint64_t));
+//             }
+//         } else {
+//             combined_size = 2 * HASH_WORDS;
 //             if (current_idx % 2 == 0) {
 //                 memcpy(combined, computed_hash, HASH_WORDS * sizeof(uint64_t));
 //                 memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
@@ -184,17 +159,12 @@ void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t
 //                 memcpy(combined + HASH_WORDS, computed_hash, HASH_WORDS * sizeof(uint64_t));
 //             }
 //         }
-
-//         // Compute the hash for this layer
-//         SHA3_host((uint8_t *)computed_hash, (uint8_t *)combined, concat_size, 256);
-
-//         // Move up to the parent node
+//         SHA3_host((uint8_t *)computed_hash, (uint8_t *)combined, combined_size * sizeof(uint64_t), 256);
 //         current_idx /= 2;
 //     }
-
-//     // Final comparison with the provided root
 //     return memcmp(computed_hash, root, HASH_WORDS * sizeof(uint64_t)) == 0;
 // }
+
 int merkle_verify(
     uint64_t *root,           // Expected Merkle root to verify against
     size_t leaf_idx,          // Index of the leaf being verified
@@ -202,45 +172,62 @@ int merkle_verify(
     size_t proof_len,         // Length of the proof path
     uint64_t *leaf            // Initial leaf (codeword element) to start the verification
 ) {
-    uint64_t computed_hash[HASH_WORDS];
-    memcpy(computed_hash, leaf, FIELD_WORDS * sizeof(uint64_t)); 
+    uint64_t current_codeword[FIELD_WORDS];
+    memcpy(current_codeword, leaf, FIELD_WORDS * sizeof(uint64_t)); 
 
     size_t current_idx = leaf_idx;
 
     for (size_t i = 0; i < proof_len; ++i) {
-        uint64_t combined[FIELD_WORDS + 2 * HASH_WORDS];
         size_t combined_size;
 
         if (i == 0) {
-            combined_size = FIELD_WORDS + HASH_WORDS;
+            uint64_t combined[2 * FIELD_WORDS];  // Buffer for concatenation
+            combined_size = 2 * FIELD_WORDS;
             if (current_idx % 2 == 0) {
-                memcpy(combined, computed_hash, FIELD_WORDS * sizeof(uint64_t));
-                memcpy(combined + FIELD_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
+                // Leaf is on the left
+                memcpy(combined, auth_path[i], 2 * FIELD_WORDS * sizeof(uint64_t));
             } else {
-                memcpy(combined, auth_path[i], HASH_WORDS * sizeof(uint64_t));
-                memcpy(combined + HASH_WORDS, computed_hash, FIELD_WORDS * sizeof(uint64_t));
+                // Leaf is on the right
+                memcpy(combined, auth_path[i], FIELD_WORDS * sizeof(uint64_t));
+                memcpy(combined + FIELD_WORDS, auth_path[i + FIELD_WORDS], FIELD_WORDS * sizeof(uint64_t));
             }
         } else if (i < 13) {
+            // Intermediate layers with FIELD_WORDS + HASH_WORDS
             combined_size = FIELD_WORDS + HASH_WORDS;
             if (current_idx % 2 == 0) {
+                // Computed hash on the left, sibling on the right
                 memcpy(combined, computed_hash, HASH_WORDS * sizeof(uint64_t));
                 memcpy(combined + HASH_WORDS, auth_path[i], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
             } else {
+                // Sibling on the left, computed hash on the right
                 memcpy(combined, auth_path[i], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
                 memcpy(combined + FIELD_WORDS + HASH_WORDS, computed_hash, HASH_WORDS * sizeof(uint64_t));
             }
         } else {
+            // Final layers with only HASH_WORDS
             combined_size = 2 * HASH_WORDS;
             if (current_idx % 2 == 0) {
+                // Computed hash on the left, sibling on the right
                 memcpy(combined, computed_hash, HASH_WORDS * sizeof(uint64_t));
                 memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
             } else {
+                // Sibling on the left, computed hash on the right
                 memcpy(combined, auth_path[i], HASH_WORDS * sizeof(uint64_t));
                 memcpy(combined + HASH_WORDS, computed_hash, HASH_WORDS * sizeof(uint64_t));
             }
         }
+
+        // Hash the concatenated result
         SHA3_host((uint8_t *)computed_hash, (uint8_t *)combined, combined_size * sizeof(uint64_t), 256);
+
+        // Move up to the next layer
         current_idx /= 2;
     }
+    printf("Computed Merkle Root: ");
+    for (int i = 0; i < HASH_WORDS; i++) {
+        printf("%016lx ", computed_hash[i]);
+    }
+    printf("\n");
+    // Check if computed hash matches the Merkle root
     return memcmp(computed_hash, root, HASH_WORDS * sizeof(uint64_t)) == 0;
 }
