@@ -334,7 +334,7 @@ void sample_indices(uint8_t* seed, size_t seed_len, int size, int reduced_size, 
         free(concatenated);  // Free allocated memory
     }
 
-    // Sort indices
+    // Sort indices 
     for (size_t i = 0; i < indices_count - 1; i++) {
         for (size_t j = i + 1; j < indices_count; j++) {
             if (indices[i] > indices[j]) {
@@ -355,8 +355,7 @@ void sample_indices(uint8_t* seed, size_t seed_len, int size, int reduced_size, 
             }
         }
     }
-
-    // Print indices
+     // Print indices
     printf("Indices: ");
     for (size_t i = 0; i < indices_count; i++) {
         printf("%zu ", indices[i]);
@@ -612,7 +611,7 @@ void calculate_indices(size_t  *c_indices, size_t  *a_indices, size_t  *b_indice
     }
 }
 
-size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size_t current_codeword_len, uint64_t **next_codeword, size_t next_codeword_len, size_t *c_indices) 
+size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size_t current_codeword_len, uint64_t **next_codeword, size_t next_codeword_len, size_t *c_indices, int round) 
 {
     int num_tests = fri->num_colinearity_tests;
     global_query_indices.a_indices = (size_t *)malloc(num_tests * sizeof(size_t));
@@ -643,13 +642,14 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         size_t proof_len_a = 0;
         uint64_t **auth_path_a = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
         size_t *proof_len_ptr_a = (size_t *)malloc(sizeof(size_t));
-        for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
-        auth_path_a[i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));  
-        }
-        merkle_open(auth_path_a, global_query_indices.a_indices[s], &proof_len_a, tree);
+        // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
+        // auth_path_a[i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));  
+        // }
+        merkle_open(auth_path_a, global_query_indices.a_indices[s], &proof_len_a, tree, round);
         *proof_len_ptr_a = proof_len_a;
         push_object(global_proof_stream, proof_len_ptr_a);
         push_count++;
+        printf("auth_path_a[0]: %016llx ", auth_path_a[0]);
         for (size_t i = 0; i < proof_len_a; i++) {
         //auth_path_a[%zu]\n", i);
         push_object(global_proof_stream, auth_path_a[i]); // Push each hash
@@ -657,9 +657,9 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         }
         printf("proof len a: %zu \n", proof_len_a);
         printf("push counted +1 in query for a_indices %d\n", push_count);
-        for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
-            free(auth_path_a[i]);
-        }
+        // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
+        //     free(auth_path_a[i]);
+        // }
         free(auth_path_a);
         // free(proof_len_ptr_a);
 
@@ -667,10 +667,10 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         size_t proof_len_b = 0; 
         uint64_t **auth_path_b = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
         size_t *proof_len_ptr_b = (size_t *)malloc(sizeof(size_t));
-        for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
-        auth_path_b[i] = (uint64_t *)malloc(HASH_SIZE);  //allocate space for each hash
-        }
-        merkle_open(auth_path_b, global_query_indices.b_indices[s], &proof_len_b, tree);
+        // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
+        // auth_path_b[i] = (uint64_t *)malloc(HASH_SIZE);  //allocate space for each hash
+        // }
+        merkle_open(auth_path_b, global_query_indices.b_indices[s], &proof_len_b, tree, round);
         *proof_len_ptr_b = proof_len_b;
         push_object(global_proof_stream, proof_len_ptr_b);
         push_count++;
@@ -681,9 +681,9 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         }
         printf("proof len b: %zu \n", proof_len_b);
         printf("push counted +1 in query for b_indices %d\n", push_count);
-        for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
-            free(auth_path_b[i]);
-        }
+        // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
+        //     free(auth_path_b[i]);
+        // }
         free(auth_path_b);
         
 
@@ -691,10 +691,10 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         size_t proof_len_c = 0;
         uint64_t **auth_path_c = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
         size_t *proof_len_ptr_c = (size_t *)malloc(sizeof(size_t));
-        for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
-        auth_path_c[i] = (uint64_t *)malloc(HASH_SIZE);  //allocate space for each hash
-        }
-        merkle_open(auth_path_c, global_query_indices.c_indices[s], &proof_len_c, tree);
+        // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
+        // auth_path_c[i] = (uint64_t *)malloc(HASH_SIZE);  //allocate space for each hash
+        // }
+        merkle_open(auth_path_c, global_query_indices.c_indices[s], &proof_len_c, tree, round+1);
         *proof_len_ptr_c = proof_len_c;
         push_object(global_proof_stream, proof_len_ptr_c);
         push_count++;
@@ -704,9 +704,9 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         push_count++;
         }
         printf("proof len c: %zu \n", proof_len_c);
-        for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
-            free(auth_path_c[i]);
-        }
+        // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH - 1; i++) {
+        //     free(auth_path_c[i]);
+        // }
         free(auth_path_c);
         // free(proof_len_ptr_c);
     }
@@ -735,12 +735,12 @@ size_t* prove(Fri* fri, uint64_t **codeword, uint64_t **tree_layer) {
     size_t *reduced_indices = (size_t *)malloc(fri->num_colinearity_tests * sizeof(size_t));
 
     //sample indices for the first round
-    sample_indices(seed, 32, codeword_length / 2, (fri->initial_domain_length >> (fri_num_rounds(fri))), fri->num_colinearity_tests, top_level_indices, reduced_indices);
+    sample_indices(seed, 32, codeword_length/2, (fri->initial_domain_length >> (fri_num_rounds(fri)- 1)), fri->num_colinearity_tests, top_level_indices, reduced_indices);
     size_t *indices = (size_t *)malloc(fri->num_colinearity_tests * sizeof(size_t));
     memcpy(indices, top_level_indices, fri->num_colinearity_tests * sizeof(size_t));
-
+    
     for (size_t i = 0; i < fri_num_rounds(fri) - 1; i++) { 
-        query(fri, codewords, codewords[i], codeword_length, codewords[i + 1], codeword_length / 2, indices);
+        query(fri, codewords, codewords[i], codeword_length, codewords[i + 1], codeword_length / 2, indices, i);
         memcpy(global_indices_tracker.round_indices[i], indices, fri->num_colinearity_tests * sizeof(size_t));
 
         for (size_t j = 0; j < fri->num_colinearity_tests; j++) {
@@ -934,24 +934,24 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
                 polynomial_values[global_query_indices.b_indices[s]] = bb[s];
             }
             // Printing the polynomial values that are not zero
-            printf("Polynomial values:\n");
-            int k = 0; // Define k outside the loop
-            for (int i = 0; i < fri->num_colinearity_tests; i++) {
-                //check if the polynomial value is zero, skip if true
-                if (is_zero(polynomial_values[i], 1)) {
-                    continue;
-                }
+            // printf("Polynomial values:\n");
+            // int k = 0; // Define k outside the loop
+            // for (int i = 0; i < fri->num_colinearity_tests; i++) {
+            //     //check if the polynomial value is zero, skip if true
+            //     if (is_zero(polynomial_values[i], 1)) {
+            //         continue;
+            //     }
             
-                // Print the current non-zero polynomial value
-                for (int j = 0; j < FIELD_WORDS; j++) {  //assuming FIELD_WORDS is the length of each polynomial value
-                    printf("%016lx ", polynomial_values[i][j]);
-                }
-                printf("\n");
-                for (int j = 0; j < FIELD_WORDS; j++) {
-                    polynomial_values[k][j] = polynomial_values[i][j];
-                }
-                k++;
-            }
+            //     // Print the current non-zero polynomial value
+            //     for (int j = 0; j < FIELD_WORDS; j++) {  //assuming FIELD_WORDS is the length of each polynomial value
+            //         printf("%016lx ", polynomial_values[i][j]);
+            //     }
+            //     printf("\n");
+            //     for (int j = 0; j < FIELD_WORDS; j++) {
+            //         polynomial_values[k][j] = polynomial_values[i][j];
+            //     }
+            //     k++;
+            // }
             uint64_t ax[field_words] = {0};
             uint64_t ax_temp[field_words] = {0};
             uint64_t bx[field_words] = {0};
@@ -1020,24 +1020,29 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
                 auth_path_a[i] = (uint64_t *)pull_object(global_proof_stream);
             }
 
-            // for (size_t i = 0; i < proof_len_a; i++) { // Debug print
-            //     printf("Layer %zu: ", i);
-            //     if (i < proof_len_a - 1) {  // Codeword + Hash for intermediate layers
-            //         printf("Codeword || Hash: ");
-            //         for (size_t j = 0; j < CONCAT_WORDS; j++) {
-            //             printf("%016lx ", auth_path_a[i][j]);
-            //         }
-            //     } else {  // Only the final hash at the root level
-            //         printf("Hash: ");
-            //         for (size_t j = 0; j < HASH_WORDS; j++) {
-            //             printf("%016lx ", auth_path_a[i][j]);
-            //         }
-            //     }
-            //     printf("\n");  // Newline after each layer
-            // }
+            printf("Authentication Path:\n");
+            for (size_t i = s; i < proof_len_a; i++) {
+                printf("Layer %zu: ", i);
+
+                size_t element_size;
+                if (i == 0) {
+                    element_size = FIELD_WORDS; // Layer 0: Only the sibling (FIELD_WORDS size)
+                } else if (i < 13) {
+                    element_size = FIELD_WORDS + FIELD_WORDS + HASH_WORDS; // Layers 1-12: Sibling includes FIELD_WORDS + HASH_WORDS
+                } else {
+                    element_size = HASH_WORDS; // Layers 13-16: Only the sibling hash (HASH_WORDS size)
+                }
+
+                // Print each element in the current auth_path layer
+                for (size_t j = 0; j < element_size; j++) {
+                    printf("%016lx ", auth_path_a[i][j]);
+                }
+                printf("\n");
+            }
+            printf("End of Authentication Path.\n");
             printf("pull in verify for auth_path_a %d\n", pull_count);
 
-            if (!merkle_verify(root_verify, global_query_indices.a_indices[s], auth_path_a, proof_len_a, aa[s])) {
+            if (!merkle_verify(root_verify, global_query_indices.a_indices[s], auth_path_a, proof_len_a, aa[s], r)) {
                 printf("merkle authentication path verification fails for aa\n");
                 free(aa);
                 free(bb);
@@ -1068,7 +1073,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
             }
             pull_count++;
             printf("pull in verify for auth_path_b %d\n", pull_count);
-            if (!merkle_verify(root_verify, global_query_indices.b_indices[s], auth_path_b, proof_len_b, bb[s])) {
+            if (!merkle_verify(root_verify, global_query_indices.b_indices[s], auth_path_b, proof_len_b, bb[s], r)) {
                 printf("merkle authentication path verification fails for bb\n");
                 free(aa);
                 free(bb);
@@ -1095,7 +1100,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
             }
             pull_count++;
             printf("pull in verify for auth_path_b %d\n", pull_count);
-            if (!merkle_verify(root_verify, global_query_indices.c_indices[s], auth_path_c, proof_len_c, cc[s])) {
+            if (!merkle_verify(root_verify, global_query_indices.c_indices[s], auth_path_c, proof_len_c, cc[s], r+1)) {
                 printf("merkle authentication path verification fails for cc\n");
                 free(aa);
                 free(bb);
