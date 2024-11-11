@@ -904,7 +904,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
         uint64_t **by = (uint64_t **)malloc(fri->num_colinearity_tests * sizeof(uint64_t *));
         uint64_t **cy = (uint64_t **)malloc(fri->num_colinearity_tests * sizeof(uint64_t *));
 
-        uint64_t precomputed_inverses[max_fri_domains];
+        uint64_t *precomputed_inverses = (uint64_t *)malloc(max_fri_domains * sizeof(uint64_t));
         load_precomputed_inverses("fri_inverses_256.txt", precomputed_inverses);
         int exponent = preon.fri_domains[0].basis_len - fri_log_domain_length(fri); 
         uint64_t denominator_inv[field_words] = {0};
@@ -1120,6 +1120,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
         free(aa);
         free(bb);
         free(cc);
+        free(precomputed_inverses);
 
     }
 
@@ -1188,15 +1189,27 @@ void test_fri(){
     // for (int i = 0; i < initial_domain_length; i++) {
     // print_field("codeword value in test_fri", codeword[i], field_words);
     // }
+    clock_t t_prover;
+    t_prover = clock();
     prove(fri, codeword, tree_layer);
+    t_prover = clock() - t_prover;
+    double time_taken_prover = ((double)t_prover)/CLOCKS_PER_SEC; // in seconds 
+ 
+    printf("fri's prover took %f seconds to execute \n", time_taken_prover); 
     printf("Returned from prove for valid codeword\n");
     //size_t num_points = 0;
     //what are these? this is the degree of the polynomial that professor was talking about?
-    uint64_t *points[32768];
-    for (int i = 0; i < 32768; i++) {
+    uint64_t *points[131072];
+    for (int i = 0; i < 131072; i++) {
         points[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
     }
+    clock_t t_verifier;
+    t_verifier = clock();
     int verdict = verify(fri, points, degree);
+    t_verifier = clock() - t_verifier;
+    double time_taken_verifier = ((double)t_verifier)/CLOCKS_PER_SEC; // in seconds 
+ 
+    //printf("fri's verifier took %f seconds to execute \n", time_taken_verifier); 
 
     if (verdict == 1)
         printf("accept proof\n");

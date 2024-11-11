@@ -114,7 +114,7 @@ void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t
                 exit(1);
             }
             // Copy the codeword element from the current index (skipping the hash part)
-            memcpy(auth_path[*proof_len], tree[i][current_index] + HASH_WORDS, FIELD_WORDS * sizeof(uint64_t));
+            memcpy(auth_path[*proof_len], tree[i][current_index], FIELD_WORDS * sizeof(uint64_t));
             // Copy the sibling element in full
             memcpy(auth_path[*proof_len] + FIELD_WORDS, tree[i][sibling_index], sibling_size * sizeof(uint64_t));
 
@@ -134,6 +134,76 @@ void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t
         //printf("current index is: %d\n", current_index);
     }
 }
+
+// int merkle_verify(
+//     uint64_t *root,
+//     size_t leaf_idx,
+//     uint64_t **auth_path,
+//     size_t proof_len,
+//     uint64_t *leaf,
+//     int layer
+// ) {
+//     uint64_t current_hash[HASH_WORDS];
+//     uint64_t combined[2 * FIELD_WORDS + HASH_WORDS];
+    
+//     // Initialize with the leaf value
+//     memcpy(current_hash, leaf, FIELD_WORDS * sizeof(uint64_t));
+
+//     for (int i = 0; i < proof_len; ++i) {
+//         // Layer 0: only FIELD_WORDS in auth_path
+//         if (i == 0) {
+//             // Combine leaf with auth_path[0] for hash calculation
+//             memcpy(combined, current_hash, FIELD_WORDS * sizeof(uint64_t));
+//             memcpy(combined + FIELD_WORDS, auth_path[i], FIELD_WORDS * sizeof(uint64_t));
+//             SHA3_host((uint8_t *)current_hash, (uint8_t *)combined, 2 * FIELD_WORDS * sizeof(uint64_t), 256);
+//         }
+//         // Layers 1-12: auth_path contains FIELD_WORDS + HASH_WORDS + FIELD_WORDS
+//         else if (i > 0 && i < 12) {
+//             // Extract first FIELD_WORDS for combination
+//             memcpy(combined, auth_path[i], FIELD_WORDS * sizeof(uint64_t));
+//             // Concat previous hash to this first part
+//             memcpy(combined + FIELD_WORDS, current_hash, HASH_WORDS * sizeof(uint64_t));
+//             // Concat remaining part of auth_path (HASH_WORDS + FIELD_WORDS)
+//             memcpy(combined + FIELD_WORDS + HASH_WORDS, auth_path[i] + FIELD_WORDS, (HASH_WORDS + FIELD_WORDS) * sizeof(uint64_t));
+//             SHA3_host((uint8_t *)current_hash, (uint8_t *)combined, (2 * FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t), 256);
+//         }
+//         // Layers 13 and above: auth_path contains only HASH_WORDS
+//         else {
+//             // Concat current hash with auth_path[i] for the final hash
+//             memcpy(combined, current_hash, HASH_WORDS * sizeof(uint64_t));
+//             memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
+//             SHA3_host((uint8_t *)current_hash, (uint8_t *)combined, 2 * HASH_WORDS * sizeof(uint64_t), 256);
+//         }
+//     }
+//     printf("Computed Merkle Root: ");
+//     for (int i = 0; i < HASH_WORDS; i++) {
+//         printf("%016lx ", current_hash[i]);
+//     }
+//     printf("\n");
+//     // Final comparison with the provided root
+//     return memcmp(root, root, HASH_WORDS * sizeof(uint64_t)) == 0;
+// }
+
+// int merkle_verify(
+//     uint64_t *root,
+//     size_t leaf_idx,
+//     uint64_t **auth_path,
+//     size_t proof_len,
+//     uint64_t *leaf,
+//     int layer
+// ) { 
+//     uint64_t hash[HASH_WORDS];
+//     if(layer == 0){
+//         uint64_t current_element[FIELD_WORDS];
+//         memcpy(current_element, leaf, FIELD_WORDS * sizeof(uint64_t));
+
+//         int sibling_size = FIELD_WORDS;
+//         uint64_t combined[FIELD_WORDS + sibling_size];
+//         memcpy(combined, current_element, FIELD_WORDS * sizeof(uint64_t));
+//         memcpy(combined + FIELD_WORDS, auth_path_a[0], FIELD_WORDS * sizeof(uint64_t));
+//         SHA3_host((uint8_t *)hash, (uint8_t *)combined, (FIELD_WORDS + sibling_size) * sizeof(uint64_t));
+//     }
+// }
 
 int merkle_verify(
     uint64_t *root,           // Expected Merkle root to verify against
@@ -176,5 +246,5 @@ int merkle_verify(
             }
             printf("\n");
     // Compare the computed root with the expected root
-    return memcmp(current_hash, root, HASH_WORDS * sizeof(uint64_t)) == 0;
+    return memcmp(root, current_hash, HASH_WORDS * sizeof(uint64_t)) == 0;
 }

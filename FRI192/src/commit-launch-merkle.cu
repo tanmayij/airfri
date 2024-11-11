@@ -99,8 +99,8 @@ uint64_t *device_tree_layer_nxt, uint64_t *device_combined_sibling_codewords, ui
         //step 2
         SHA3((uint8_t *)&device_digest[idx5], (uint8_t *)&device_combined_sibling_codewords[idx3], 2 * FIELD_WORDS * sizeof(uint64_t), 256);
         //step 3
-        memcpy(&device_concat_codeword_to_hash[idx4], &device_digest[idx5], HASH_WORDS * sizeof(uint64_t));
-        memcpy(&device_concat_codeword_to_hash[idx4 + HASH_WORDS], &device_codeword_nxt[idx3], FIELD_WORDS * sizeof(uint64_t));
+        memcpy(&device_concat_codeword_to_hash[idx4], &device_codeword_nxt[idx3], FIELD_WORDS * sizeof(uint64_t));
+        memcpy(&device_concat_codeword_to_hash[idx4 + FIELD_WORDS], &device_digest[idx5], HASH_WORDS * sizeof(uint64_t));
         //step 4
         memcpy(&device_tree_layer_nxt[idx3], &device_concat_codeword_to_hash[idx4], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
     
@@ -109,17 +109,18 @@ uint64_t *device_tree_layer_nxt, uint64_t *device_combined_sibling_codewords, ui
     if(I < N/2 && N < 131072 && N >= 64) {
         int idx1 = 2 * I * (FIELD_WORDS + HASH_WORDS);
         int idx2 = (2 * I + 1) * (FIELD_WORDS + HASH_WORDS);
-        int idx3 = I * (FIELD_WORDS + HASH_WORDS);//for codeword_nxt element
+        int idx3 = I * FIELD_WORDS;//for codeword_nxt element
         int idx5 = I * HASH_WORDS; //for hash
         int idx4 = I * (FIELD_WORDS + HASH_WORDS);
+        int idx6 = I * 2 * (FIELD_WORDS + HASH_WORDS);
         //step 1
-        memcpy(&device_combined_sibling_codewords[idx3], &device_tree_layer[idx1], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
-        memcpy(&device_combined_sibling_codewords[idx3 + (FIELD_WORDS + HASH_WORDS)], &device_tree_layer[idx2], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
+        memcpy(&device_combined_sibling_codewords[idx6], &device_tree_layer[idx1], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
+        memcpy(&device_combined_sibling_codewords[idx6 + (FIELD_WORDS + HASH_WORDS)], &device_tree_layer[idx2], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
         //step 2
-        SHA3((uint8_t *)&device_digest[idx5], (uint8_t *)&device_combined_sibling_codewords[idx3], 2 * (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t), 256);
+        SHA3((uint8_t *)&device_digest[idx5], (uint8_t *)&device_combined_sibling_codewords[idx6], 2 * (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t), 256);
         //step3
-        memcpy(&device_concat_codeword_to_hash[idx4], &device_digest[idx5], HASH_WORDS * sizeof(uint64_t));
-        memcpy(&device_concat_codeword_to_hash[idx4 + HASH_WORDS], &device_codeword_nxt[idx3], FIELD_WORDS * sizeof(uint64_t));
+        memcpy(&device_concat_codeword_to_hash[idx4], &device_codeword_nxt[idx3], FIELD_WORDS * sizeof(uint64_t));
+        memcpy(&device_concat_codeword_to_hash[idx4 + FIELD_WORDS], &device_digest[idx5], HASH_WORDS * sizeof(uint64_t));
         //step 4
         memcpy(&device_tree_layer_nxt[idx3], &device_concat_codeword_to_hash[idx4], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
 
@@ -142,11 +143,12 @@ __global__ void merkle_kernel(
         int idx1 = 2 * I * (FIELD_WORDS + HASH_WORDS);
         int idx2 = (2 * I + 1) * (FIELD_WORDS + HASH_WORDS);
         int idx3 = I * HASH_WORDS;
+        int idx4 = I * 2 * (FIELD_WORDS + HASH_WORDS);
         //step 1
-        memcpy(&device_combined_sibling_codewords[idx3], &device_tree_layer[idx1], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
-        memcpy(&device_combined_sibling_codewords[idx3 + (FIELD_WORDS + HASH_WORDS)], &device_tree_layer[idx2], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
+        memcpy(&device_combined_sibling_codewords[idx4], &device_tree_layer[idx1], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
+        memcpy(&device_combined_sibling_codewords[idx4 + (FIELD_WORDS + HASH_WORDS)], &device_tree_layer[idx2], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
         //step 2
-        SHA3((uint8_t *)&device_digest[idx3],(uint8_t *)&device_combined_sibling_codewords[idx3], 2 * (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t), 256);
+        SHA3((uint8_t *)&device_digest[idx3],(uint8_t *)&device_combined_sibling_codewords[idx4], 2 * (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t), 256);
         //step 3 - save all hashes in tree_layer_nxt
         memcpy(&device_tree_layer_nxt[idx3], &device_digest[idx3], HASH_WORDS * sizeof(uint64_t) );
     }
@@ -156,9 +158,10 @@ __global__ void merkle_kernel(
         int idx1 = 2 * I * (HASH_WORDS);
         int idx2 = (2 * I + 1) * (HASH_WORDS);
         int idx3 = I * HASH_WORDS;
+        int idx4 = I * 2 * HASH_WORDS;
         //step 1
-        memcpy(&device_combined_sibling_hashes[idx3], &device_tree_layer[idx1], (HASH_WORDS) * sizeof(uint64_t));
-        memcpy(&device_combined_sibling_hashes[idx3 + (HASH_WORDS)], &device_tree_layer[idx2], (HASH_WORDS) * sizeof(uint64_t));
+        memcpy(&device_combined_sibling_hashes[idx4], &device_tree_layer[idx1], (HASH_WORDS) * sizeof(uint64_t));
+        memcpy(&device_combined_sibling_hashes[idx4 + (HASH_WORDS)], &device_tree_layer[idx2], (HASH_WORDS) * sizeof(uint64_t));
         //step 2
         SHA3((uint8_t *)&device_digest[idx3], (uint8_t *)&device_combined_sibling_hashes[idx3], 2 * (HASH_WORDS) * sizeof(uint64_t), 256);
         //step 3 - save all hashes in tree_layer_nxt
@@ -435,7 +438,12 @@ void commit_launch(
     cudaFree(device_tree_layer);
     cudaFree(device_tree_layer_nxt);
     free(flattened_tree_layer_nxt);
-
+    // write_to_file("temp1.txt", flattened_temp1, FIELD_WORDS, N/2);
+    // write_to_file("temp2.txt", flattened_temp2, FIELD_WORDS, N/2);
+    // write_to_file("temp3.txt", flattened_temp3, FIELD_WORDS, N/2);
+    // write_to_file("temp4.txt", flattened_temp4, FIELD_WORDS, N/2);
+    // write_to_file("temp5.txt", flattened_temp5, FIELD_WORDS, N/2);
+    // write_to_file("alpha_offset.txt", flattened_alpha_offset, FIELD_WORDS, N/2);
 
     // if (N == 64) { 
     //     int tree_idx = 2 * (int)log2(N);
@@ -541,7 +549,7 @@ void commit_launch(
             // Run merkle_kernel for each layer (computes next layer hashes)
             merkle_kernel<<<nb, tpb>>>(device_layer_hashes, device_merkle_root, device_tree_layer, device_tree_layer_nxt, device_combined_sibling_codewords, device_digest, device_combined_sibling_hashes, next_N);
             cudaDeviceSynchronize();
-    
+            
             // Copy device_tree_layer_nxt from device to host for the current layer
             cudaMalloc((void **)&device_tree_layer_nxt, (next_N / 2) * HASH_WORDS * sizeof(uint64_t));
             cudaMemcpy(flattened_tree_layer_nxt, device_tree_layer_nxt, (next_N / 2) * HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
