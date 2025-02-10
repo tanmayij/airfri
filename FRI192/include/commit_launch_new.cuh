@@ -54,8 +54,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "../include/field.cuh"
-#include "../include/hash-host.cuh"
 #include "../include/hash.cuh"
+#include "../include/hash-host.cuh"
 #define MAX_EVAL_BASIS_LEN 20
 #define MAX_FRI_PARAMETERS 16
 #define HASH_WORDS 4
@@ -87,14 +87,8 @@ __global__ void merkle_kernel(
     uint64_t *device_combined_sibling_hashes,
     int N
 );
-
 __global__ void compute_tree_layers(uint64_t *device_codeword_nxt, uint64_t *device_layer_hashes, uint64_t *device_tree_layer,
     uint64_t *device_tree_layer_nxt, uint64_t *device_combined_sibling_codewords, uint64_t *device_concat_codeword_to_hash, uint64_t *device_digest, int N);
-
-__global__ void compute_merkle_root_kernel(
-    uint64_t *device_tree_layer,   
-    uint64_t *device_merkle_root   
-);
 
 extern "C" {
     void commit_launch(

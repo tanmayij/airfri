@@ -195,7 +195,7 @@ Fri* init_fri(int initial_domain_length, int expansion_factor, int num_colineari
 //the below function computes the number of rounds in the protocol. it should be 12 consistently. 
 int fri_num_rounds(Fri* fri) {
     int codeword_length = fri->initial_domain_length;
-    //printf("Initial codeword length: %d\n", codeword_length);
+    printf("Initial codeword length: %d\n", codeword_length);
 
     int num_rounds = 0;
     int max_rounds = 12;  //set the maximum number of rounds to 12
@@ -206,7 +206,7 @@ int fri_num_rounds(Fri* fri) {
         num_rounds += 1;
     }
 
-    //printf("Final codeword length after %d rounds: %d\n", num_rounds, codeword_length);
+    printf("Final codeword length after %d rounds: %d\n", num_rounds, codeword_length);
     return num_rounds;
 }
 
@@ -528,7 +528,7 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
             codeword_nxt[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
             tree_layer_nxt[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
         }
-        commit_launch(codeword, codeword_nxt, alpha, &offset, denominator_inv, eval_basis, N, root, tree_layer, tree_layer_nxt, tree);
+        commit_launch(codeword, codeword_nxt, alpha, &offset, denominator_inv, eval_basis, N, root, tree_layer, tree_layer_nxt, tree, fri->initial_domain_length, fri->initial_domain_length >> fri_num_rounds(fri));
         if(N > 32) {
         N = N / 2;
         codeword = codeword_nxt;
@@ -551,9 +551,9 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
         printf("%016lx ", root[i]);
     }
     printf("\n");
-    printf("Checking if tree[16] has Root of FRI:\n");
+    printf("Checking if tree[17] has Root of FRI:\n");
     for (size_t i = 0; i < HASH_WORDS; i++) {  
-        printf("%016lx ", tree[16][0][i]);
+        printf("%016lx ", tree[17][0][i]);
     }
     printf("\n");
     printf("Push successful\n");
@@ -625,7 +625,7 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
     global_query_indices.b_indices, global_query_indices.num_colinearity_tests);
 
     //the below loop is going to run for each round, for the total number of tests. 
-    for(int s = 0; s < num_tests; s++){ 
+    for(int s = 0; s < num_tests; s++){
         push_object(global_proof_stream, current_codeword[global_query_indices.a_indices[s]]);
         print_field("current_codeword[a_indices[s]]", current_codeword[global_query_indices.a_indices[s]], field_words);
         push_count++;
@@ -642,7 +642,7 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         size_t proof_len_a = 0;
         uint64_t **auth_path_a = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
         size_t *proof_len_ptr_a = (size_t *)malloc(sizeof(size_t));
-        // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) { 
+        // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
         // auth_path_a[i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));  
         // }
         merkle_open(auth_path_a, global_query_indices.a_indices[s], &proof_len_a, tree, round);
@@ -1007,7 +1007,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
                 free(last_domain_elements);
                 return 0;
             }
-            printf("Colinearity check passed");
+
             //check auth_path_a
             uint64_t **auth_path_a = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
             for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
@@ -1016,7 +1016,6 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
 
             size_t *proof_len_ptr_a = (size_t *)pull_object(global_proof_stream);
             size_t proof_len_a = *proof_len_ptr_a;
-            printf("proof len a here is: %zu \n", proof_len_a);
             for (size_t i = 0; i < proof_len_a; i++) {
                 auth_path_a[i] = (uint64_t *)pull_object(global_proof_stream);
             }
@@ -1027,13 +1026,14 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
 
                 size_t element_size;
                 if (i == 0) {
-                    element_size = FIELD_WORDS; //Layer 0: Only the sibling (FIELD_WORDS size)
+                    element_size = FIELD_WORDS; // Layer 0: Only the sibling (FIELD_WORDS size)
                 } else if (i < 13) {
-                    element_size = FIELD_WORDS + FIELD_WORDS + HASH_WORDS; //Layers 1-12: Sibling includes FIELD_WORDS + HASH_WORDS
+                    element_size = FIELD_WORDS + FIELD_WORDS + HASH_WORDS; // Layers 1-12: Sibling includes FIELD_WORDS + HASH_WORDS
                 } else {
-                    element_size = HASH_WORDS; //Layers 13-16: Only the sibling hash (HASH_WORDS size)
+                    element_size = HASH_WORDS; // Layers 13-16: Only the sibling hash (HASH_WORDS size)
                 }
 
+                // Print each element in the current auth_path layer
                 for (size_t j = 0; j < element_size; j++) {
                     printf("%016lx ", auth_path_a[i][j]);
                 }
@@ -1130,7 +1130,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
 }
 
 void test_fri(){
-    int degree = 4095; //hardcoded for L3 security parameters 
+    int degree = 4095;
     int expansion_factor = 32;
     int num_colinearity_tests = 13;
 
@@ -1167,6 +1167,7 @@ void test_fri(){
         field_add(domain_elements[i], &offset, temp, field_words);
         //print_field("domain_elements[i]", domain_elements[i], FIELD_WORDS);
     }
+    // Evaluate polynomial over the domain
     uint64_t **codeword = (uint64_t **)malloc(initial_domain_length * sizeof(uint64_t *));
     uint64_t **tree_layer = (uint64_t **)malloc(initial_domain_length * sizeof(uint64_t *));
     for (int i = 0; i < initial_domain_length; i++) {
@@ -1182,7 +1183,7 @@ void test_fri(){
     for (int i = 0; i < initial_domain_length; i++) {
         memcpy(tree_layer[i], codeword[i], FIELD_WORDS * sizeof(uint64_t));
     }
-    //Test valid codeword
+    // Test valid codeword
     printf("Testing valid codeword ...\n");
     printf("Calling prove\n");
     // for (int i = 0; i < initial_domain_length; i++) {
@@ -1260,7 +1261,7 @@ void test_fri(){
     //     fprintf(stderr, "Proof should fail, but is accepted ...\n");
     //     exit(EXIT_FAILURE);
     // }
-    //printf("Success! \\o/\n");
+    // printf("Success! \\o/\n");
 
 }
 
