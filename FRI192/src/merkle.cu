@@ -143,38 +143,84 @@ int merkle_verify(
     uint64_t *leaf,           
     int layer
 ) {
-    uint64_t current_hash[HASH_WORDS];
+    // Allocate memory for current_hash
+    uint64_t *current_hash = (uint64_t *)malloc(HASH_WORDS * sizeof(uint64_t));
+    if (current_hash == NULL) {
+        fprintf(stderr, "Memory allocation failed for current_hash\n");
+        exit(1);
+    }
+    
+    // Allocate memory for new_hash to store the computed hash
+    uint64_t *new_hash = (uint64_t *)malloc(HASH_WORDS * sizeof(uint64_t));
+    if (new_hash == NULL) {
+        fprintf(stderr, "Memory allocation failed for new_hash\n");
+        free(current_hash);
+        exit(1);
+    }
+
     memcpy(current_hash, leaf, FIELD_WORDS * sizeof(uint64_t));
 
     for (size_t i = layer; i < proof_len; i++) {
-        uint64_t combined[2 * (FIELD_WORDS + HASH_WORDS)]; 
+        uint64_t *combined;
         size_t combined_size;
 
         if (i == 0) {
-            //layer 0
+            // Layer 0
+            combined = (uint64_t *)malloc(2 * FIELD_WORDS * sizeof(uint64_t));
+            if (combined == NULL) {
+                fprintf(stderr, "Memory allocation failed for combined\n");
+                free(current_hash);
+                free(new_hash);
+                exit(1);
+            }
             combined_size = 2 * FIELD_WORDS;
             memcpy(combined, current_hash, FIELD_WORDS * sizeof(uint64_t));
             memcpy(combined + FIELD_WORDS, auth_path[i], FIELD_WORDS * sizeof(uint64_t));
+            // combined[0] = 0x3be052336fbeb42a;
+            // combined[1] = 0x955977e40235ffae;
+            // combined[2] = 0x0162d69b9a4f7f8b;
+            // combined[3] = 0xf322b38dcdf68013;
         } else if (i < 13) {
-            //layers 1-12
+            // Layers 1-12
+            combined = (uint64_t *)malloc(2 * (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
+            if (combined == NULL) {
+                fprintf(stderr, "Memory allocation failed for combined\n");
+                free(current_hash);
+                free(new_hash);
+                exit(1);
+            }
             combined_size = 2 * (FIELD_WORDS + HASH_WORDS);
             memcpy(combined, auth_path[i], FIELD_WORDS * sizeof(uint64_t));
             memcpy(combined + FIELD_WORDS, current_hash, HASH_WORDS * sizeof(uint64_t));
             memcpy(combined + FIELD_WORDS + HASH_WORDS, auth_path[i] + FIELD_WORDS, (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
         } else {
-            //layers 13-16
+            // Layers 13-16
+            combined = (uint64_t *)malloc(2 * HASH_WORDS * sizeof(uint64_t));
+            if (combined == NULL) {
+                fprintf(stderr, "Memory allocation failed for combined\n");
+                free(current_hash);
+                free(new_hash);
+                exit(1);
+            }
             combined_size = 2 * HASH_WORDS;
             memcpy(combined, current_hash, HASH_WORDS * sizeof(uint64_t));
             memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
         }
+        memset(new_hash, 0, HASH_WORDS * sizeof(uint64_t));
+        SHA3_host((uint8_t *)new_hash, (uint8_t *)combined, combined_size * sizeof(uint64_t), 256);
+        printf("SHA3 Output: ");
+        for (int j = 0; j < HASH_WORDS; j++) {
+            printf("%016lx ", new_hash[j]);
+        }
+        printf("\n");
+        memcpy(current_hash, new_hash, HASH_WORDS * sizeof(uint64_t));
+        memset(new_hash, 0, HASH_WORDS * sizeof(uint64_t));
 
-        SHA3_host((uint8_t *)current_hash, (uint8_t *)combined, combined_size * sizeof(uint64_t), 256);
-
-        //Debugging
+        // Debugging
         if (i < 13) {
             printf("Layer %zu Debug:\n", i);
             printf("Combined Input: ");
-            for (int j = 0; j < combined_size; j++) {
+            for (size_t j = 0; j < combined_size; j++) {
                 printf("%016lx ", combined[j]);
             }
             printf("\nNew Current Hash: ");
@@ -183,13 +229,22 @@ int merkle_verify(
             }
             printf("\n");
         }
+
+        free(combined);
     }
 
+    // Print final computed root
     printf("Computed Merkle Root: ");
     for (int i = 0; i < HASH_WORDS; i++) {
         printf("%016lx ", current_hash[i]);
     }
     printf("\n");
 
-    return memcmp(root, current_hash, HASH_WORDS * sizeof(uint64_t)) == 0;
+    int result = memcmp(root, current_hash, HASH_WORDS * sizeof(uint64_t)) == 0;
+
+    // Free dynamically allocated memory
+    free(current_hash);
+    free(new_hash);
+
+    return result;
 }

@@ -102,8 +102,7 @@ uint64_t *device_tree_layer_nxt, uint64_t *device_combined_sibling_codewords, ui
         memcpy(&device_concat_codeword_to_hash[idx4], &device_codeword_nxt[idx3], FIELD_WORDS * sizeof(uint64_t));
         memcpy(&device_concat_codeword_to_hash[idx4 + FIELD_WORDS], &device_digest[idx5], HASH_WORDS * sizeof(uint64_t));
         //step 4: future-> remove this dependency
-        memcpy(&device_tree_layer_nxt[idx4], &device_concat_codeword_to_hash[idx4], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
-    
+        memcpy(&device_tree_layer_nxt[idx4], &device_concat_codeword_to_hash[idx4], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));  
     }
 
     if(I < N/2 && N < 131072 && N >= 64) {

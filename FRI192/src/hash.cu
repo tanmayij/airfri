@@ -239,7 +239,7 @@
  }
 
 __device__ void SHA3(uint8_t *hm, const uint8_t *msg, size_t msg_len, size_t bitSize)
-{
+{   
     SHA3s(hm, (const uint8_t *[]){msg}, (size_t[]){msg_len}, 1, bitSize);
 }
 
