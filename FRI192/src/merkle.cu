@@ -151,10 +151,10 @@ int merkle_verify(
     }
     
     // Allocate memory for new_hash to store the computed hash
-    uint64_t *new_hash = (uint64_t *)malloc(HASH_WORDS * sizeof(uint64_t));
+    uint64_t *new_hash = (uint64_t *)calloc(HASH_WORDS, sizeof(uint64_t));
     if (new_hash == NULL) {
         fprintf(stderr, "Memory allocation failed for new_hash\n");
-        free(current_hash);
+        free(new_hash);
         exit(1);
     }
 
@@ -206,18 +206,18 @@ int merkle_verify(
             memcpy(combined, current_hash, HASH_WORDS * sizeof(uint64_t));
             memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
         }
-        memset(new_hash, 0, HASH_WORDS * sizeof(uint64_t));
+        //memset(new_hash, 0, HASH_WORDS * sizeof(uint64_t));
         SHA3_host((uint8_t *)new_hash, (uint8_t *)combined, combined_size * sizeof(uint64_t), 256);
-        printf("SHA3 Output: ");
-        for (int j = 0; j < HASH_WORDS; j++) {
-            printf("%016lx ", new_hash[j]);
-        }
+        // printf("SHA3 Output: ");
+        // for (int j = 0; j < HASH_WORDS; j++) {
+        //     printf("%016lx ", new_hash[j]);
+        // }
         printf("\n");
         memcpy(current_hash, new_hash, HASH_WORDS * sizeof(uint64_t));
         memset(new_hash, 0, HASH_WORDS * sizeof(uint64_t));
 
         // Debugging
-        if (i < 13) {
+        //if (i < 13) {
             printf("Layer %zu Debug:\n", i);
             printf("Combined Input: ");
             for (size_t j = 0; j < combined_size; j++) {
@@ -228,7 +228,7 @@ int merkle_verify(
                 printf("%016lx ", current_hash[j]);
             }
             printf("\n");
-        }
+        //}
 
         free(combined);
     }

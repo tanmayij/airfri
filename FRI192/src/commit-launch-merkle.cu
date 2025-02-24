@@ -9,6 +9,9 @@
 #include "../include/commit-launch-merkle.cuh"
 #include "../include/field.cuh"
 const size_t field_words = 4;
+
+void SHA3_host(uint8_t *hm, const uint8_t *msg, size_t msg_len, size_t bitSize);
+
 __device__ void print_field_kernel(const char *label, const uint64_t *field, int field_words) {
     printf("%s: ", label);
     for (int i = 0; i < field_words; i++) {
@@ -138,7 +141,7 @@ __global__ void merkle_kernel(
     int I = blockIdx.x * blockDim.x + threadIdx.x;
     int idx1, idx2, idx3, idx4;
 
-    if(I < N/2 && N == 32){ //only if N is 32, we use codewords
+    if(I < N/2 && (N == 32 || N == 64)){ //only if N is 32 or N is 64, we use codewords
         idx1 = 2 * I * (FIELD_WORDS + HASH_WORDS);
         idx2 = (2 * I + 1) * (FIELD_WORDS + HASH_WORDS);
         idx3 = I * HASH_WORDS;
@@ -184,26 +187,30 @@ __global__ void merkle_kernel(
     //     // Store the computed root in device_merkle_root
     //     memcpy(device_merkle_root, &device_digest[idx3], HASH_WORDS * sizeof(uint64_t));
     // }
-    if (I == 0 && N == 2) {
-        // Compute Merkle root within this kernel instead of launching another one
-        int idx1 = 0 * HASH_WORDS; 
-        int idx2 = 1 * HASH_WORDS;
-        int idx3 = 0 * HASH_WORDS;
-        int idx4 = 0 * 2 * HASH_WORDS;
+//     if (I == 0 && N == 2) {
+//         // Compute Merkle root within this kernel instead of launching another one
+//         int idx1 = 0 * HASH_WORDS; 
+//         int idx2 = 1 * HASH_WORDS;
+//         int idx3 = 0 * HASH_WORDS;
+//         int idx4 = 0 * 2 * HASH_WORDS;
 
-        uint64_t combined_sibling_hashes[2 * HASH_WORDS];
+//         uint64_t combined_sibling_hashes[2 * HASH_WORDS];
 
-        memcpy(&combined_sibling_hashes[0], &device_tree_layer[idx1], HASH_WORDS * sizeof(uint64_t));
-        memcpy(&combined_sibling_hashes[HASH_WORDS], &device_tree_layer[idx2], HASH_WORDS * sizeof(uint64_t));
+//         memcpy(&combined_sibling_hashes[0], &device_tree_layer[idx1], HASH_WORDS * sizeof(uint64_t));
+//         memcpy(&combined_sibling_hashes[HASH_WORDS], &device_tree_layer[idx2], HASH_WORDS * sizeof(uint64_t));
+//         printf("combined_sibling_hashes before SHA3 in commit kernel: ");
+//         for (int j = 0; j < 2 * HASH_WORDS; j++) {
+//             printf("%016lx ", combined_sibling_hashes[j]);
+//         }
+//         printf("\n");
+//         SHA3((uint8_t *)&device_merkle_root[idx3], (uint8_t *)combined_sibling_hashes, 2 * HASH_WORDS * sizeof(uint64_t), 256);
 
-        SHA3((uint8_t *)&device_merkle_root[idx3], (uint8_t *)combined_sibling_hashes, 2 * HASH_WORDS * sizeof(uint64_t), 256);
-
-        printf("Computed Merkle Root inside kernel: ");
-        for (int j = 0; j < HASH_WORDS; j++) {
-            printf("%016lx ", device_merkle_root[j]);
-        }
-        printf("\n");
-    }
+//         printf("Computed Merkle Root inside kernel: ");
+//         for (int j = 0; j < HASH_WORDS; j++) {
+//             printf("%016lx ", device_merkle_root[j]);
+//         }
+//         printf("\n");
+//     }
 }
 
 __global__ void compute_merkle_root_kernel(
@@ -221,7 +228,11 @@ __global__ void compute_merkle_root_kernel(
         // Copy the sibling hashes into the combined buffer
         memcpy(&combined_sibling_hashes[0], &device_tree_layer[idx1], HASH_WORDS * sizeof(uint64_t));
         memcpy(&combined_sibling_hashes[HASH_WORDS], &device_tree_layer[idx2], HASH_WORDS * sizeof(uint64_t));
-
+        printf("combined_sibling_hashes before SHA3 in commit kernel: ");
+        for (int j = 0; j < 2 * HASH_WORDS; j++) {
+            printf("%016lx ", combined_sibling_hashes[j]);
+        }
+        printf("\n");
         // Compute the Merkle root using SHA3
         SHA3(
             (uint8_t *)device_merkle_root,                  // Destination: Merkle root
@@ -229,6 +240,11 @@ __global__ void compute_merkle_root_kernel(
             2 * HASH_WORDS * sizeof(uint64_t),             // Input size: 2 sibling hashes
             256                                            // Output size: 256 bits
         );
+        printf("Computed Merkle Root inside kernel: ");
+        for (int j = 0; j < HASH_WORDS; j++) {
+            printf("%016lx ", device_merkle_root[j]);
+        }
+        printf("\n");
     }
 }
 
@@ -489,7 +505,9 @@ void commit_launch(
     printf("\n");
     cudaFree(device_tree_layer);
     cudaFree(device_tree_layer_nxt);
+    if(N!=64){
     free(flattened_tree_layer_nxt);
+    }
     // write_to_file("temp1.txt", flattened_temp1, FIELD_WORDS, N/2);
     // write_to_file("temp2.txt", flattened_temp2, FIELD_WORDS, N/2);
     // write_to_file("temp3.txt", flattened_temp3, FIELD_WORDS, N/2);
@@ -497,90 +515,11 @@ void commit_launch(
     // write_to_file("temp5.txt", flattened_temp5, FIELD_WORDS, N/2);
     // write_to_file("alpha_offset.txt", flattened_alpha_offset, FIELD_WORDS, N/2);
 
-    // if (N == 64) { 
-    //     int tree_idx = 2 * (int)log2(N);
-    //     tree[tree_idx] = (uint64_t **)malloc((N/2) * sizeof(uint64_t *));
-    //     for(int i = 0; i < N/2; i ++){
-    //         tree[tree_idx][i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));
-    //     }
-    //     tree_idx++; 
-    //     int next_N = N / 2;
-    //     for(int layer = tree_idx; layer <= 18; layer++){
-    //         tree[layer] = (uint64_t **)malloc((next_N / 2) * sizeof(uint64_t *));
-    //         for(int i = 0; i < next_N / 2; i++){
-    //             tree[layer][i] = (uint64_t *)malloc(2 * HASH_WORDS * sizeof(uint64_t));
-    //             if (!tree[layer][i]) {
-    //                 printf("Memory allocation failed at tree[%d][%d]\n", layer, i);
-    //                 exit(1); 
-    //             }
-    //         }
-    //         next_N = next_N / 2;
-    //         printf("Allocated memory for tree[%d] with %d elements\n", layer, (next_N / 2) * HASH_WORDS);
-    //     }
-    
-    //     int index = 13;
-    //     int threads_per_block = 32;
-    //     int num_blocks = (N / 2 + threads_per_block - 1) / threads_per_block;
-    
-    //     // Copy the last flattened layer from device to host
-    //     cudaMemcpy(flattened_tree_layer_nxt, device_tree_layer_nxt, (N / 2) * HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
-    
-    //     // Unflatten and assign to tree[12]
-    //     for (int i = 0; i < N / 2; i++) {
-    //         for (int j = 0; j < CONCAT_WORDS; j++) {
-    //             tree[12][i][j] = flattened_tree_layer_nxt[i * CONCAT_WORDS + j];
-    //         }
-    //     }
-    
-    //     free(flattened_tree_layer_nxt);
-    //     cudaFree(device_tree_layer_nxt);
-    
-    //     printf("Starting iterative Merkle kernel computation up the tree\n");
-    //     N /= 2;
-    
-    //     // Allocate for iterative usage
-    //     flattened_tree_layer_nxt = (uint64_t *)malloc((N / 2) * CONCAT_WORDS * sizeof(uint64_t));
-    //     cudaMalloc((void **)&device_tree_layer_nxt, (N / 2) * CONCAT_WORDS * sizeof(uint64_t));
-    
-    //     while (N > 1) {
-    //         int tpb = N / 2;
-    //         int nb = (N + tpb - 1) / tpb;
-    
-    //         merkle_kernel<<<nb, tpb>>>(device_layer_hashes, device_merkle_root, device_tree_layer, device_tree_layer_nxt, N);
-    //         cudaDeviceSynchronize();
-    
-    //         // Copy next layer from device to host
-    //         cudaMemcpy(flattened_tree_layer_nxt, device_tree_layer_nxt, (N / 2) * HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
-    
-    //         for (int i = 0; i < N / 2; i++) {
-    //             for (int j = 0; j < HASH_WORDS; j++) {
-    //                 tree[index][i][j] = flattened_tree_layer_nxt[i * HASH_WORDS + j];
-    //             }
-    //         }
-    
-    //         if (N == 2) {
-    //             cudaMemcpy(root, device_merkle_root, HASH_SIZE, cudaMemcpyDeviceToHost);
-    //         }
-    
-    //         N /= 2;
-    //         index++;
-    //     }
-    
-    //     free(flattened_tree_layer_nxt);
-    //     cudaFree(device_tree_layer_nxt);
-    // }
-    //something's up here
     if (N == 64) { 
         int tree_idx = 12;  //start with layer 12 for N == 64
         int next_N = N / 2; //initialize to 32 for the next layer size
         
-        //allocate flattened memory for device -> host transfer
-        uint64_t *flattened_tree_layer_nxt = (uint64_t *)malloc((N / 2) * CONCAT_WORDS * sizeof(uint64_t));
-    
-        //step 1: unflatten tree_layer_nxt computed by commit_kernel and assign it to tree[12]
-        cudaMalloc((void **)&device_tree_layer_nxt, (N / 2) * CONCAT_WORDS * sizeof(uint64_t));
-        cudaMemcpy(flattened_tree_layer_nxt, device_tree_layer_nxt, (N / 2) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
-    
+        //first transfer the tree_layer_nxt elements to tree[12]
         tree[tree_idx] = (uint64_t **)malloc((next_N) * sizeof(uint64_t *));
         for (int i = 0; i < next_N; i++) {
             tree[tree_idx][i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));
@@ -588,46 +527,43 @@ void commit_launch(
                 tree[tree_idx][i][j] = flattened_tree_layer_nxt[i * CONCAT_WORDS + j];
             }
         }
+        //free this so it can be re-initialized below
+        free(flattened_tree_layer_nxt);
+        //allocate flattened memory for device -> host transfer
+        uint64_t *flattened_tree_layer_nxt = (uint64_t *)malloc((N / 2) * CONCAT_WORDS * sizeof(uint64_t));
+    
+        //step 1: unflatten tree_layer_nxt computed by commit_kernel and assign it to tree[12]
+        cudaMalloc((void **)&device_tree_layer_nxt, (N / 2) * CONCAT_WORDS * sizeof(uint64_t));
+        //cudaMemcpy(flattened_tree_layer_nxt, device_tree_layer_nxt, (N / 2) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
+    
+        // tree[tree_idx] = (uint64_t **)malloc((next_N) * sizeof(uint64_t *));
+        // for (int i = 0; i < next_N; i++) {
+        //     tree[tree_idx][i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));
+        //     for (int j = 0; j < CONCAT_WORDS; j++) {
+        //         tree[tree_idx][i][j] = flattened_tree_layer_nxt[i * CONCAT_WORDS + j];
+        //     }
+        // }
         tree_idx++;  // Move to the next tree layer index
 
         // Step 2: Assign tree_layer_nxt to tree_layer for the upcoming Merkle kernel computation
-        cudaMemcpy(device_tree_layer, device_tree_layer_nxt, (next_N / 2) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToDevice);
-        // N = N/2;//32
-        // //step3: loop over the remaining layers and only compute hashes.
-        // while(N>=2){ //reduce until N becomes 2
-        //     int tpb = N;
-        //     if(tpb == 0) {tpb = 1;}
-        //     int nb = (N + (tpb - 1)) / tpb;
-
-        //     //launch merkle_kernel which will prallely compute the merkle tree layers for each layer. start when layer has 32 elements
-        //     merkle_kernel<<<nb, tpb>>>(device_layer_hashes, device_merkle_root, device_tree_layer, device_tree_layer_nxt, device_combined_sibling_codewords, device_digest, device_combined_sibling_hashes, N);
-        //     cudaDeviceSynchronize();
-
-        //     //copy the next layer in the tree from device to host
-        //     cudaMalloc((void **)&device_tree_layer_nxt, (N / 2) * HASH_WORDS * sizeof(uint64_t)); //next layer in devicewould have N/2 elements
-        //     cudaMemcpy(flattened_tree_layer_nxt, device_tree_layer_nxt, (N/2) * HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToDevice); //copy to device_layer_nxt
-        //     printf("First few tree_layer_nxt values in the looooop:\n");
-        //     for (int i = 0; i < HASH_WORDS; i++) {
-        //         printf("%016lx ", flattened_tree_layer_nxt[i]);
-        //     }
-        //     printf("\n");
-        //     //unflatten and store tree layer values in 'tree'
-        //     tree[tree_idx] = (uint64_t **)malloc((next_N / 2) * sizeof(uint64_t *));
-        //     for (int i = 0; i < next_N / 2; i++) {
-        //         tree[tree_idx][i] = (uint64_t *)malloc(HASH_WORDS * sizeof(uint64_t));
-        //         for (int j = 0; j < HASH_WORDS; j++) {
-        //             tree[tree_idx][i][j] = flattened_tree_layer_nxt[i * HASH_WORDS + j];
-        //         }
-        //     }
-        //     //update tree_idx? 
-        // }
-    
+        //cudaMemcpy(device_tree_layer, device_tree_layer_nxt, (next_N / 2) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToDevice);
+        merkle_kernel<<<2, 32>>>(
+            device_layer_hashes, 
+            device_merkle_root, 
+            device_tree_layer, 
+            device_tree_layer_nxt, 
+            device_combined_sibling_codewords, 
+            device_digest, 
+            device_combined_sibling_hashes, 
+            next_N
+        );
+        cudaDeviceSynchronize();
         //step 3: Loop over remaining layers, updating tree[layer] with each iteration
-        while (next_N >= 2) {
+        while (next_N > 2) {
             int tpb = min(32, next_N / 2);
             if(tpb == 0) {tpb = 1;}
             int nb = (next_N + tpb - 1) / tpb;
-    
+            
             // merkle_kernel for each layer (computes next layer hashes)
             merkle_kernel<<<nb, tpb>>>(device_layer_hashes, device_merkle_root, device_tree_layer, device_tree_layer_nxt, device_combined_sibling_codewords, device_digest, device_combined_sibling_hashes, next_N);
             cudaDeviceSynchronize();
@@ -647,7 +583,7 @@ void commit_launch(
                     tree[tree_idx][i][j] = flattened_tree_layer_nxt[i * HASH_WORDS + j];
                 }
             }
-            printf("Populated tree[%d] with %d elements\n", tree_idx, next_N / 2);
+            printf("Populated tree[%d] with %d elements\n", tree_idx, next_N/2);
             tree_idx++;
             
             //step 4: Update device_tree_layer with the contents of device_tree_layer_nxt
@@ -655,35 +591,10 @@ void commit_launch(
 
             next_N /= 2;
         // Handle the final layer (tree[16]) to compute the Merkle root
-        if (next_N == 2) {
-            // Copy Merkle root directly from device after merkle_kernel execution
-            cudaMemcpy(root, device_merkle_root, HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
-        
-            // Print the computed Merkle root
-            printf("Computed Merkle Root: ");
-            for (int i = 0; i < HASH_WORDS; i++) {
-                printf("%016lx ", root[i]);
-            }
-            printf("\n");
-        }
         // if (next_N == 2) {
-        //     // Allocate memory for the Merkle root on the device
-        //     uint64_t *device_merkle_root;
-        //     cudaMalloc((void **)&device_merkle_root, HASH_WORDS * sizeof(uint64_t));
-
-        //     // Launch kernel to compute the Merkle root
-        //     compute_merkle_root_kernel<<<1, 1>>>(
-        //         device_tree_layer,     // Input: Final layer with two sibling hashes
-        //         device_merkle_root     // Output: Merkle root
-        //     );
-        //     cudaDeviceSynchronize();
-
-        //     // Copy the Merkle root from device to host
+        //     // Copy Merkle root directly from device after merkle_kernel execution
         //     cudaMemcpy(root, device_merkle_root, HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
-
-        //     // Free device memory for the root
-        //     cudaFree(device_merkle_root);
-
+        
         //     // Print the computed Merkle root
         //     printf("Computed Merkle Root: ");
         //     for (int i = 0; i < HASH_WORDS; i++) {
@@ -691,11 +602,41 @@ void commit_launch(
         //     }
         //     printf("\n");
         // }
-        } //close while loop
-        free(flattened_tree_layer_nxt);
-    }
-
-    
+        }// close while
+        //do not delete the below code - only comment it
+        // for (int layer = 13; layer <= 16; layer++) {
+        //     int elements = 1 << (17 - layer);  // Number of elements in this layer
+        //     printf("\n=== DEBUG: tree[%d] Elements ===\n", layer);
+            
+        //     for (int i = 0; i < elements; i++) {
+        //         printf("Index %d: ", i);
+        //         for (int j = 0; j < HASH_WORDS; j++) {
+        //             printf("%016lx ", tree[layer][i][j]);  // Print each hash
+        //         }
+        //         printf("\n");
+        //     }
+        // }
+        printf("\n=== DEBUG: tree[16] Elements (Last Layer Before Merkle Root) ===\n");
+        for (int i = 0; i < 2; i++) {  // Only two elements in the final layer
+            printf("Index %d: ", i);
+            for (int j = 0; j < HASH_WORDS; j++) {
+                printf("%016lx ", tree[16][i][j]);  // Print each hash
+            }
+            printf("\n");
+        }
+        compute_merkle_root_kernel<<<1, 1>>>(
+            device_tree_layer_nxt,  // The last computed layer (contains 2 hashes)
+            device_merkle_root      // Output: The final Merkle root
+        );
+        cudaDeviceSynchronize();
+        
+        cudaMemcpy(root, device_merkle_root, HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
+        
+        printf("Computed Merkle Root: ");
+        for (int i = 0; i < HASH_WORDS; i++) {
+            printf("%016lx ", root[i]);
+        }
+        printf("\n");
     
     cudaFree(device_codeword_nxt);
     cudaFree(device_alpha);
@@ -704,7 +645,7 @@ void commit_launch(
     cudaFree(device_eval_basis);
     cudaFree(device_merkle_root);
     cudaFree(device_layer_hashes);
-
+    }
     free(flattened_codeword);
     free(flattened_codeword_nxt);
 
