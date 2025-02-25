@@ -1,156 +1,167 @@
 // #include <stdio.h>
 // #include <stdint.h>
+// #include <stdlib.h>
 // #include <string.h>
-// #include "../include/hash-host.cuh"
-// // Function prototype for your SHA3 implementation
-// void SHA3_host(uint8_t *hm, const uint8_t *msg, size_t msg_len, size_t bitSize);
+// #include "../include/hash-host.cuh"  // Include your SHA3 implementation
+// #define HASH_WORDS 4
+// // Function to check if the given value produces the expected hash
+// int check_sha3_hash(uint64_t *input_value, uint64_t *expected_hash) {
+//     // Allocate memory for the computed hash
+//     uint64_t *computed_hash = (uint64_t *)calloc(HASH_WORDS,sizeof(uint64_t));
+//     if (computed_hash == NULL) {
+//         fprintf(stderr, "Memory allocation failed for computed_hash\n");
+//         exit(1);
+//     }
 
-// int main() {
-//     // Define the two uint64_t arrays
-//     //89dd7af006338570 d48d9f6a0bd4789a 191a6d9b6064a1d9 99fcd542a536b8f0 e19f652cead15b7c 9b1d5b341353aefa 00d46fb70440a09a 673464b40434e931
-//     uint64_t input1[] = {0x89dd7af006338570, 0xd48d9f6a0bd4789a, 0x191a6d9b6064a1d9, 0x99fcd542a536b8f0};
-//     uint64_t input2[] = {0xe19f652cead15b7c, 0x9b1d5b341353aefa, 0x00d46fb70440a09a, 0x673464b40434e931};
-//     //Computed Merkle Root: 7c77747851e67fa6 481cf7c1d470a73d 8e5c6e57f51975a5 f8b3b270e3457274 
-//     // Convert input arrays to byte arrays for hashing
-//     uint8_t msg[sizeof(input1) + sizeof(input2)];
-//     memcpy(msg, input1, sizeof(input1));
-//     memcpy(msg + sizeof(input1), input2, sizeof(input2));
-
-//     // Output buffer for the SHA3-256 hash (32 bytes = 256 bits)
-//     uint8_t hash[32];
+//     // Allocate memory for intermediate hash storage
+//     uint64_t *new_hash = (uint64_t *)calloc(HASH_WORDS, sizeof(uint64_t));
+//     if (new_hash == NULL) {
+//         fprintf(stderr, "Memory allocation failed for new_hash\n");
+//         free(computed_hash);
+//         exit(1);
+//     }
 
 //     // Compute SHA3-256 hash
-//     SHA3_host(hash, msg, sizeof(msg), 256);
+//     printf("Input Bytes: ");
+//     uint8_t *byte_ptr = (uint8_t *)input_value;
+//     for (size_t i = 0; i < sizeof(uint64_t) * 2; i++) {
+//         printf("%02x ", byte_ptr[i]);
+//     }
+//     printf("\n");
+//     SHA3_host((uint8_t *)new_hash, (uint8_t *)input_value, 16 * sizeof(uint64_t), 256);
 
-//     // Print the hash result
-//     printf("SHA3-256 Hash: ");
-//     for (size_t i = 0; i < sizeof(hash); i++) {
-//         printf("%02x", hash[i]);
+//     // Copy new_hash into computed_hash
+//     memcpy(computed_hash, new_hash, HASH_WORDS * sizeof(uint64_t));
+
+//     // Reset new_hash to 0 for safety
+//     memset(new_hash, 0, HASH_WORDS * sizeof(uint64_t));
+
+//     // Debugging Output
+//     printf("Computed SHA3-256 Hash: ");
+//     for (int i = 0; i < HASH_WORDS; i++) {
+//         printf("%016lx ", computed_hash[i]);
 //     }
 //     printf("\n");
 
+//     // Compare computed hash with expected hash
+//     int result = memcmp(expected_hash, computed_hash, HASH_WORDS * sizeof(uint64_t)) == 0;
+
+//     // Free dynamically allocated memory
+//     free(computed_hash);
+//     free(new_hash);
+
+//     return result;
+// }
+
+// // Example usage
+// int main() {
+//     // Define sizes
+//     size_t input_size = 4 * 2 * sizeof(uint64_t);  // 4 uint64_t values (32 bytes)
+//     size_t hash_size = 4 * sizeof(uint64_t);   // SHA3-256 output (32 bytes)
+
+//     // Allocate memory for input values
+//     uint64_t *input_value = (uint64_t *)malloc(input_size);
+//     if (input_value == NULL) {
+//         fprintf(stderr, "Memory allocation failed for input_value\n");
+//         exit(1);
+//     }
+//     // uint64_t *input_value_two = (uint64_t *)malloc(input_size);
+//     // if (input_value_two == NULL) {
+//     //     fprintf(stderr, "Memory allocation failed for input_value\n");
+//     //     exit(1);
+//     // }
+//     // Assign values to input dynamically
+//     //e5a7f5767e64120c 5489c9cff08d54af e1a9542d0fc7d723 909fe4aa0a71622b 29344544f00caa72 38f774874aeeb124 4cfa6381a6ad40b1 9ce4a8b4681cce0c
+//     input_value[0] = 0xd46f02faa854a139;
+//     input_value[1] = 0x5eda12fdcfc6b414;
+//     input_value[2] = 0x4d2614da35978182;
+//     input_value[3] = 0xd9c7afb2bf4dc4ae;
+//     input_value[4] = 0xcc10bba2731e29a7;
+//     input_value[5] = 0x4191eaf10b4fbbbf;
+//     input_value[6] = 0xdd0931c636bd24bc;
+//     input_value[7] = 0x35c56d2534530a85;
+ 
+   
+//     // Dynamically allocate memory for the expected hash
+//     uint64_t *expected_hash = (uint64_t *)malloc(hash_size);
+//     if (expected_hash == NULL) {
+//         fprintf(stderr, "Memory allocation failed for expected_hash\n");
+//         free(input_value);
+//         exit(1);
+//     }
+
+//     // Assign values to dynamically allocated hash array
+//     expected_hash[0] = 0xd46f02faa854a139;
+//     expected_hash[1] = 0x5eda12fdcfc6b414;
+//     expected_hash[2] = 0x4d2614da35978182;
+//     expected_hash[3] = 0xd9c7afb2bf4dc4ae;
+
+//     // Check if the input produces the expected hash
+//     int is_match = check_sha3_hash(input_value, expected_hash);
+//     //int is_is_match = check_sha3_hash(input_value_two, expected_hash);
+//     // Print the result
+//     if (is_match) {
+//         printf("Hash matches the expected output!\n");
+//     } else {
+//         printf("Hash does NOT match the expected output!\n");
+//     }
+
+//     // Free allocated memory
+//     free(input_value);
+//     free(expected_hash);
+//     //free(input_value_two);
 //     return 0;
 // }
 
 #include <stdio.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
-#include "../include/hash-host.cuh"  // Include your SHA3 implementation
-#define HASH_WORDS 4
-// Function to check if the given value produces the expected hash
-int check_sha3_hash(uint64_t *input_value, uint64_t *expected_hash) {
-    // Allocate memory for the computed hash
-    uint64_t *computed_hash = (uint64_t *)calloc(HASH_WORDS,sizeof(uint64_t));
-    if (computed_hash == NULL) {
-        fprintf(stderr, "Memory allocation failed for computed_hash\n");
-        exit(1);
-    }
+#include "../include/hash-host.cuh"  // Ensure this includes the `SHA3_host` function
 
-    // Allocate memory for intermediate hash storage
-    uint64_t *new_hash = (uint64_t *)calloc(HASH_WORDS, sizeof(uint64_t));
-    if (new_hash == NULL) {
-        fprintf(stderr, "Memory allocation failed for new_hash\n");
-        free(computed_hash);
-        exit(1);
-    }
+#define HASH_WORDS 4  // Assuming SHA3-256 output is 4 uint64_t values
 
-    // Compute SHA3-256 hash
-    printf("Input Bytes: ");
-    uint8_t *byte_ptr = (uint8_t *)input_value;
-    for (size_t i = 0; i < sizeof(uint64_t) * 2; i++) {
-        printf("%02x ", byte_ptr[i]);
-    }
-    printf("\n");
-    SHA3_host((uint8_t *)new_hash, (uint8_t *)input_value, 16 * sizeof(uint64_t), 256);
+void check_sha3_hash(const uint64_t input[HASH_WORDS], const uint64_t expected[HASH_WORDS]) {
+    uint64_t output[HASH_WORDS];
 
-    // Copy new_hash into computed_hash
-    memcpy(computed_hash, new_hash, HASH_WORDS * sizeof(uint64_t));
+    // Compute SHA3 hash
+    SHA3_host((uint8_t *)output, (uint8_t *)input, HASH_WORDS * sizeof(uint64_t), 256);
 
-    // Reset new_hash to 0 for safety
-    memset(new_hash, 0, HASH_WORDS * sizeof(uint64_t));
-
-    // Debugging Output
-    printf("Computed SHA3-256 Hash: ");
+    // Print computed hash
+    printf("\nComputed SHA3-256 Hash:\n");
     for (int i = 0; i < HASH_WORDS; i++) {
-        printf("%016lx ", computed_hash[i]);
+        printf("%016lx ", output[i]);
     }
     printf("\n");
 
-    // Compare computed hash with expected hash
-    int result = memcmp(expected_hash, computed_hash, HASH_WORDS * sizeof(uint64_t)) == 0;
+    // Print expected hash
+    printf("Expected Hash:\n");
+    for (int i = 0; i < HASH_WORDS; i++) {
+        printf("%016lx ", expected[i]);
+    }
+    printf("\n");
 
-    // Free dynamically allocated memory
-    free(computed_hash);
-    free(new_hash);
+    // Compare computed and expected values
+    int match = 1;
+    for (int i = 0; i < HASH_WORDS; i++) {
+        if (output[i] != expected[i]) {
+            match = 0;
+            break;
+        }
+    }
 
-    return result;
+    if (match) {
+        printf("\n✅ Hash matches the expected output!\n");
+    } else {
+        printf("\n❌ Hash does NOT match the expected output!\n");
+    }
 }
 
 // Example usage
 int main() {
-    // Define sizes
-    size_t input_size = 4 * 4 * sizeof(uint64_t);  // 4 uint64_t values (32 bytes)
-    size_t hash_size = 4 * sizeof(uint64_t);   // SHA3-256 output (32 bytes)
+    uint64_t input[4 * HASH_WORDS] = {0x59adc3dd2ae6d02f, 0x7e7723533d8488ff, 0xe5fbf70703ff0535, 0xa238fef804d33cce, 0x44930ea537da00b2, 0x0e10126fe9483315, 0xb8c3b0f953cc0110, 0x8ecc941aedc4552d};
+    uint64_t expected[HASH_WORDS] = {0xf3a531b17531e7ca, 0xc441865ce0816489, 0x88cd9af9aacef637, 0xee9149e44d8c2fd6};
 
-    // Allocate memory for input values
-    uint64_t *input_value = (uint64_t *)malloc(input_size);
-    if (input_value == NULL) {
-        fprintf(stderr, "Memory allocation failed for input_value\n");
-        exit(1);
-    }
-    // uint64_t *input_value_two = (uint64_t *)malloc(input_size);
-    // if (input_value_two == NULL) {
-    //     fprintf(stderr, "Memory allocation failed for input_value\n");
-    //     exit(1);
-    // }
-    // Assign values to input dynamically
-    //aee4290157638f18 7376a1e1d60e9215 1ab57593ca9897c3 293169be78e5d870 52112ce2303df2ab 82e0aad5ebcb52dc 9d8330a46a595fe2 
-    //300677d3a2bdd52b 8f4fcf245ff23125 f7946e66c2b269bb bbbeb802e252af6d 1aae94649c454267 c077c338c4e280ed 3fb2c191b54df591 3f77c65d96b80881 703ffcb6e4888675
-    input_value[0] = 0xaee4290157638f18;
-    input_value[1] = 0x7376a1e1d60e9215;
-    input_value[2] = 0x1ab57593ca9897c3;
-    input_value[3] = 0x293169be78e5d870;
-    input_value[4] = 0x52112ce2303df2ab;
-    input_value[5] = 0x82e0aad5ebcb52dc;
-    input_value[6] = 0x9d8330a46a595fe2;
-    input_value[7] = 0x300677d3a2bdd52b;
-    input_value[8] = 0x8f4fcf245ff23125;
-    input_value[9] = 0xf7946e66c2b269bb;
-    input_value[10] = 0xbbbeb802e252af6d;
-    input_value[11] = 0x1aae94649c454267;
-    input_value[12] = 0xc077c338c4e280ed;
-    input_value[13] = 0x3fb2c191b54df591;
-    input_value[14] = 0x3f77c65d96b80881;
-    input_value[15] = 0x703ffcb6e4888675;
-   
-    // Dynamically allocate memory for the expected hash
-    uint64_t *expected_hash = (uint64_t *)malloc(hash_size);
-    if (expected_hash == NULL) {
-        fprintf(stderr, "Memory allocation failed for expected_hash\n");
-        free(input_value);
-        exit(1);
-    }
+    check_sha3_hash(input, expected);
 
-    // Assign values to dynamically allocated hash array
-    expected_hash[0] = 0x4ef977537b8a0509;
-    expected_hash[1] = 0xede8eb9ea64a25c4;
-    expected_hash[2] = 0x1cc96e1ab10ef543;
-    expected_hash[3] = 0x839f06b4f98baba0;
-
-    // Check if the input produces the expected hash
-    int is_match = check_sha3_hash(input_value, expected_hash);
-    //int is_is_match = check_sha3_hash(input_value_two, expected_hash);
-    // Print the result
-    if (is_match) {
-        printf("Hash matches the expected output!\n");
-    } else {
-        printf("Hash does NOT match the expected output!\n");
-    }
-
-    // Free allocated memory
-    free(input_value);
-    free(expected_hash);
-    //free(input_value_two);
     return 0;
 }

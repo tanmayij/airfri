@@ -138,6 +138,8 @@ int main() {
         exit(1);
     }
     // Assign values to input dynamically
+    //d46f02faa854a139 5eda12fdcfc6b414 4d2614da35978182 d9c7afb2bf4dc4ae
+    //cc10bba2731e29a7 4191eaf10b4fbbbf dd0931c636bd24bc 35c56d2534530a85
     input_value[0] = 0x3be052336fbeb42a;
     input_value[1] = 0x955977e40235ffae;
     input_value[2] = 0x0162d69b9a4f7f8b;
