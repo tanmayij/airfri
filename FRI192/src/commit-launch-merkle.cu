@@ -102,7 +102,7 @@ __global__ void compute_tree_layers(
     if (I < N / 2 && N == 131072) {
         int idx1 = 2 * I * FIELD_WORDS;
         int idx2 = (2 * I + 1) * FIELD_WORDS;
-        int idx3 = I * FIELD_WORDS;  // for codeword_nxt element
+        int idx3 = I * (2 * FIELD_WORDS);  // for codeword_nxt element
         int idx5 = I * HASH_WORDS;   // for hash
         int idx4 = I * (FIELD_WORDS + HASH_WORDS);
 
@@ -114,7 +114,7 @@ __global__ void compute_tree_layers(
         SHA3((uint8_t *)&device_digest[idx5], (uint8_t *)&device_combined_sibling_codewords[idx3], 2 * FIELD_WORDS * sizeof(uint64_t), 256);
 
         for (int j = 0; j < FIELD_WORDS; j++) {
-            device_concat_codeword_to_hash[idx4 + j] = device_codeword_nxt[idx3 + j];
+            device_concat_codeword_to_hash[idx4 + j] = device_codeword_nxt[idx3 / 2 + j]; //fix
         }
         for (int j = 0; j < HASH_WORDS; j++) {
             device_concat_codeword_to_hash[idx4 + FIELD_WORDS + j] = device_digest[idx5 + j];
@@ -139,8 +139,9 @@ __global__ void compute_tree_layers(
 
         SHA3((uint8_t *)&device_digest[idx5], (uint8_t *)&device_combined_sibling_codewords[idx6], 2 * (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t), 256);
 
+    
         for (int j = 0; j < FIELD_WORDS; j++) {
-            device_concat_codeword_to_hash[idx4 + j] = device_codeword_nxt[idx3 + j];
+            device_concat_codeword_to_hash[idx4 + j] = device_codeword_nxt[idx3 / 2 + j];  //fix
         }
         for (int j = 0; j < HASH_WORDS; j++) {
             device_concat_codeword_to_hash[idx4 + FIELD_WORDS + j] = device_digest[idx5 + j];

@@ -63,7 +63,7 @@ int check_sha3_hash_gpu(uint64_t *input_value, uint64_t *expected_hash, size_t i
 // Example usage
 int main() {
     // Define sizes
-    size_t input_size = 16 * sizeof(uint64_t);  // 16 uint64_t values (128 bytes)
+    size_t input_size = 8 * sizeof(uint64_t);  // 16 uint64_t values (128 bytes)
     size_t hash_size = 4 * sizeof(uint64_t);    // SHA3-256 output (32 bytes)
 
     // Allocate memory for input values
@@ -74,15 +74,17 @@ int main() {
     }
 
     // Assign values to input dynamically
-
-    input_value[0] = 0xea09e462003c9a76;
-    input_value[1] = 0x7f6202591b6d54ab;
-    input_value[2] = 0xb5f1ebb26fe44a2f;
-    input_value[3] = 0x5701e630a806778c;
-    input_value[4] = 0x1ecd7a4ab500524e;
-    input_value[5] = 0x890005156c5daab9;
-    input_value[6] = 0x484ee268faa0f3af;
-    input_value[7] = 0x732f3b116510ec16;
+    // /  Node 434: 315d0d06a9c3bcd4 d749848d3d7f4ad9 219615812f93ba46 101be396442833ec 
+  //a9b23c6ee97e67c8 f18522c4f3a0f426 19269050202b9e90 0a7a45c93fce8b53 6800d7dd20e5a7a9 68004ece40d71ccc 33a07d9a9f3655c9 108aac5a2de2311d e164f911fd13b483 37999306d369bb32 44f0d9406ff1291f f7749dadc2993a40 448458739aa4e3b1 1b72f2bf0f402c81 df1eb5c6e94f5dd1 033cafe3438ef825
+    input_value[0] = 0xa9b23c6ee97e67c8;
+    input_value[1] = 0xf18522c4f3a0f426;
+    input_value[2] = 0x19269050202b9e90;
+    input_value[3] = 0x0a7a45c93fce8b53; 
+    input_value[4] = 0x6800d7dd20e5a7a9;
+    input_value[5] = 0x68004ece40d71ccc;
+    input_value[6] = 0x33a07d9a9f3655c9;
+    input_value[7] = 0x108aac5a2de2311d;
+    
     input_value[8] = 0xb5482ae7600392bf;
     input_value[9] = 0x255dbd5446ab15c8;
     input_value[10] = 0x3f1476e9a98a36f1;
@@ -101,10 +103,11 @@ int main() {
     }
 
     // Assign expected hash values
-    expected_hash[0] = 0x807ef22d564090aa;
-    expected_hash[1] = 0x192c3385ff3473df;
-    expected_hash[2] = 0xc54461a269b5e70b;
-    expected_hash[3] = 0x64cb44f4f0e32af0;
+    //6800d7dd20e5a7a9 68004ece40d71ccc 33a07d9a9f3655c9 108aac5a2de2311d 
+    expected_hash[0] = 0x6800d7dd20e5a7a9;
+    expected_hash[1] = 0x68004ece40d71ccc;
+    expected_hash[2] = 0x33a07d9a9f3655c9;
+    expected_hash[3] = 0x108aac5a2de2311d;
 
     // Check SHA3 hash computation on GPU
     int is_match = check_sha3_hash_gpu(input_value, expected_hash, input_size);

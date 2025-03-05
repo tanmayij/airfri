@@ -135,6 +135,152 @@ void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t
     }
 }
 
+//merkle_verify should do the following:
+//step 1: when i = 0, combine the leaf and the first element (which will be codeword) in the auth path.
+//step 2: when i > 0 and i < 13, combine the codeword and the hash in the auth path. when leaf_idx is odd, add computed hash to the end of the combined array. when leaf_idx is even, add computed hash starting the [FIELD_WORDS + 1] index of the combined array.
+//step 3: when i >= 13, combine the two hashes in the auth path. same as step 2, add computed hash to the end of the combined array if leaf_idx is odd, otherwise add computed hash starting the [HASH_WORDS] index of the combined array.
+//step 4: compute the new hash using the combined array.
+//step 5: compare the computed hash with the root hash. return 1 if they are equal, 0 otherwise.
+
+//Function to verify a Merkle proof
+// int merkle_verify(
+//     uint64_t *root,           
+//     size_t leaf_idx,          
+//     uint64_t **auth_path,     
+//     size_t proof_len,         
+//     uint64_t *leaf,           
+//     int layer
+// ) {
+//     // Allocate memory for current_hash
+//     uint64_t *current_hash = (uint64_t *)malloc(HASH_WORDS * sizeof(uint64_t));
+//     if (current_hash == NULL) {
+//         fprintf(stderr, "Memory allocation failed for current_hash\n");
+//         exit(1);
+//     }
+
+//     // Allocate memory for new_hash
+//     uint64_t *new_hash = (uint64_t *)calloc(HASH_WORDS, sizeof(uint64_t));
+//     if (new_hash == NULL) {
+//         fprintf(stderr, "Memory allocation failed for new_hash\n");
+//         free(current_hash);
+//         exit(1);
+//     }
+
+//     memcpy(current_hash, leaf, FIELD_WORDS * sizeof(uint64_t));
+
+//     for (size_t i = layer; i < proof_len; i++) {
+//         uint64_t *combined;
+//         size_t combined_size;
+
+//         int is_even = (leaf_idx % 2 == 0);
+
+//         if (i == 0) {
+//             // **Layer 0**: Only combine 2 * FIELD_WORDS
+//             combined_size = 2 * FIELD_WORDS;
+//             combined = (uint64_t *)malloc(combined_size * sizeof(uint64_t));
+
+//             if (combined == NULL) {
+//                 fprintf(stderr, "Memory allocation failed for combined\n");
+//                 free(current_hash);
+//                 free(new_hash);
+//                 exit(1);
+//             }
+
+//             memcpy(combined, current_hash, FIELD_WORDS * sizeof(uint64_t));
+//             memcpy(combined + FIELD_WORDS, auth_path[i], FIELD_WORDS * sizeof(uint64_t));
+
+//         } else if (i < 13) {
+//             // **Layers 1-12**: Lone codeword + hash handling
+//             if (is_even) {
+//                 // Even index: lone codeword + computed hash + (codeword + hashword)
+//                 combined_size = 2 * FIELD_WORDS + HASH_WORDS;
+//                 combined = (uint64_t *)malloc(combined_size * sizeof(uint64_t));
+
+//                 if (combined == NULL) {
+//                     fprintf(stderr, "Memory allocation failed for combined\n");
+//                     free(current_hash);
+//                     free(new_hash);
+//                     exit(1);
+//                 }
+
+//                 memcpy(combined, auth_path[i], FIELD_WORDS * sizeof(uint64_t));
+//                 memcpy(combined + FIELD_WORDS, current_hash, HASH_WORDS * sizeof(uint64_t));
+//                 memcpy(combined + FIELD_WORDS + HASH_WORDS, auth_path[i] + FIELD_WORDS, (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
+//             } 
+//             else {
+//                 // Odd index: (codeword + hashword) + lone codeword + computed hash
+//                 combined_size = 2 * FIELD_WORDS + HASH_WORDS;
+//                 combined = (uint64_t *)malloc(combined_size * sizeof(uint64_t));
+
+//                 if (combined == NULL) {
+//                     fprintf(stderr, "Memory allocation failed for combined\n");
+//                     free(current_hash);
+//                     free(new_hash);
+//                     exit(1);
+//                 }
+
+//                 memcpy(combined, auth_path[i] + FIELD_WORDS, (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
+//                 memcpy(combined + FIELD_WORDS + HASH_WORDS, auth_path[i], FIELD_WORDS * sizeof(uint64_t));
+//                 memcpy(combined + FIELD_WORDS, current_hash, HASH_WORDS * sizeof(uint64_t));
+//             }
+//         } 
+//         else {
+//             // **Layers 13-16**: Standard `HASH_WORDS + HASH_WORDS`
+//             combined_size = 2 * HASH_WORDS;
+//             combined = (uint64_t *)malloc(combined_size * sizeof(uint64_t));
+
+//             if (combined == NULL) {
+//                 fprintf(stderr, "Memory allocation failed for combined\n");
+//                 free(current_hash);
+//                 free(new_hash);
+//                 exit(1);
+//             }
+
+//             if (is_even) {
+//                 memcpy(combined, current_hash, HASH_WORDS * sizeof(uint64_t));
+//                 memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
+//             } else {
+//                 memcpy(combined, auth_path[i], HASH_WORDS * sizeof(uint64_t));
+//                 memcpy(combined + HASH_WORDS, current_hash, HASH_WORDS * sizeof(uint64_t));
+//             }
+//         }
+
+//         // Compute new hash
+//         SHA3_host((uint8_t *)new_hash, (uint8_t *)combined, combined_size * sizeof(uint64_t), 256);
+        
+//         memcpy(current_hash, new_hash, HASH_WORDS * sizeof(uint64_t));
+//         memset(new_hash, 0, HASH_WORDS * sizeof(uint64_t));
+
+//         // Debugging print
+//         printf("Layer %zu Debug:\n", i);
+//         printf("Combined Input: ");
+//         for (size_t j = 0; j < combined_size; j++) {
+//             printf("%016lx ", combined[j]);
+//         }
+//         printf("\nNew Current Hash: ");
+//         for (int j = 0; j < HASH_WORDS; j++) {
+//             printf("%016lx ", current_hash[j]);
+//         }
+//         printf("\n");
+
+//         free(combined);
+//         leaf_idx /= 2;  // Move up the tree for the next layer
+//     }
+
+//     printf("Computed Merkle Root: ");
+//     for (int i = 0; i < HASH_WORDS; i++) {
+//         printf("%016lx ", current_hash[i]);
+//     }
+//     printf("\n");
+
+//     int result = memcmp(root, current_hash, HASH_WORDS * sizeof(uint64_t)) == 0;
+
+//     free(current_hash);
+//     free(new_hash);
+
+//     return result;
+// }
+
 int merkle_verify(
     uint64_t *root,           
     size_t leaf_idx,          
@@ -143,112 +289,116 @@ int merkle_verify(
     uint64_t *leaf,           
     int layer
 ) {
-    // Allocate memory for current_hash
     uint64_t *current_hash = (uint64_t *)malloc(HASH_WORDS * sizeof(uint64_t));
     if (current_hash == NULL) {
         fprintf(stderr, "Memory allocation failed for current_hash\n");
         exit(1);
     }
-    
-    // Allocate memory for new_hash to store the computed hash
+
     uint64_t *new_hash = (uint64_t *)calloc(HASH_WORDS, sizeof(uint64_t));
     if (new_hash == NULL) {
         fprintf(stderr, "Memory allocation failed for new_hash\n");
-        free(new_hash);
+        free(current_hash);
         exit(1);
     }
 
     memcpy(current_hash, leaf, FIELD_WORDS * sizeof(uint64_t));
 
     for (size_t i = layer; i < proof_len; i++) {
-        uint64_t *combined;
         size_t combined_size;
+        uint64_t *combined;
 
+        int is_even = ((leaf_idx) % 2 == 0);
+
+   
         if (i == 0) {
-            // Layer 0
-            combined = (uint64_t *)malloc(2 * FIELD_WORDS * sizeof(uint64_t));
-            if (combined == NULL) {
-                fprintf(stderr, "Memory allocation failed for combined\n");
-                free(current_hash);
-                free(new_hash);
-                exit(1);
-            }
             combined_size = 2 * FIELD_WORDS;
-            memcpy(combined, current_hash, FIELD_WORDS * sizeof(uint64_t));
-            memcpy(combined + FIELD_WORDS, auth_path[i], FIELD_WORDS * sizeof(uint64_t));
-            // combined[0] = 0x3be052336fbeb42a;
-            // combined[1] = 0x955977e40235ffae;
-            // combined[2] = 0x0162d69b9a4f7f8b;
-            // combined[3] = 0xf322b38dcdf68013;
-        } else if (i < 13) {
-            // Layers 1-12
-            combined = (uint64_t *)malloc(2 * (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
-            if (combined == NULL) {
-                fprintf(stderr, "Memory allocation failed for combined\n");
+            combined = (uint64_t *)malloc(combined_size * sizeof(uint64_t));
+        
+            if (!combined) {
+                fprintf(stderr, "Memory allocation failed\n");
                 free(current_hash);
                 free(new_hash);
                 exit(1);
             }
-            combined_size = 2 * (FIELD_WORDS + HASH_WORDS);
-            memcpy(combined, auth_path[i], FIELD_WORDS * sizeof(uint64_t));
-            memcpy(combined + FIELD_WORDS, current_hash, HASH_WORDS * sizeof(uint64_t));
-            memcpy(combined + FIELD_WORDS + HASH_WORDS, auth_path[i] + FIELD_WORDS, (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
-        } else {
-            // Layers 13-16
-            combined = (uint64_t *)malloc(2 * HASH_WORDS * sizeof(uint64_t));
-            if (combined == NULL) {
-                fprintf(stderr, "Memory allocation failed for combined\n");
-                free(current_hash);
-                free(new_hash);
-                exit(1);
+        
+            if (is_even) {
+                //even index: Computed Hash first, then Lone Codeword
+                memcpy(combined, current_hash, FIELD_WORDS * sizeof(uint64_t)); //computed_hash = leaf_idx here
+                memcpy(combined + FIELD_WORDS, auth_path[i], FIELD_WORDS * sizeof(uint64_t)); //other codeword
+            } else {
+                //odd index: Lone Codeword first, then Computed Hash
+                memcpy(combined, auth_path[i], FIELD_WORDS * sizeof(uint64_t)); // Lone Codeword
+                memcpy(combined + FIELD_WORDS, current_hash, FIELD_WORDS * sizeof(uint64_t)); // Computed Hash
             }
-            combined_size = 2 * HASH_WORDS;
-            memcpy(combined, current_hash, HASH_WORDS * sizeof(uint64_t));
-            memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t));
         }
-        //memset(new_hash, 0, HASH_WORDS * sizeof(uint64_t));
+
+     
+        else if (i < 13) {
+            combined_size = 2 * (FIELD_WORDS + HASH_WORDS);
+            combined = (uint64_t *)malloc(combined_size * sizeof(uint64_t));
+        
+            if (!combined) {
+                fprintf(stderr, "Memory allocation failed\n");
+                free(current_hash);
+                free(new_hash);
+                exit(1);
+            }
+            if (is_even) {
+                //Even index: Lone Codeword + Computed Hash + (Codeword + Hashword)
+                memcpy(combined, auth_path[i], FIELD_WORDS * sizeof(uint64_t)); // Lone Codeword
+                memcpy(combined + FIELD_WORDS, current_hash, HASH_WORDS * sizeof(uint64_t)); // Computed Hash
+                memcpy(combined + FIELD_WORDS + HASH_WORDS, auth_path[i] + FIELD_WORDS, (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t)); // Codeword + Hashword
+            } 
+            else {
+                //Odd index: (Codeword + Hashword) + Lone Codeword + Computed Hash
+                memcpy(combined, auth_path[i] + FIELD_WORDS, (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t)); // Codeword + Hashword
+                memcpy(combined + FIELD_WORDS + HASH_WORDS, auth_path[i], FIELD_WORDS * sizeof(uint64_t)); // Lone Codeword
+                memcpy(combined + FIELD_WORDS + HASH_WORDS + FIELD_WORDS, current_hash, HASH_WORDS * sizeof(uint64_t)); // Computed Hash
+            }
+            
+        }
+        
+        else {
+            combined_size = 2 * HASH_WORDS;
+            combined = (uint64_t *)malloc(combined_size * sizeof(uint64_t));
+        
+            if (!combined) {
+                fprintf(stderr, "Memory allocation failed\n");
+                free(current_hash);
+                free(new_hash);
+                exit(1);
+            }
+        
+            if (is_even) {
+                // Even index: Computed Hash first, then Sibling Hash
+                memcpy(combined, current_hash, HASH_WORDS * sizeof(uint64_t)); // Computed Hash
+                memcpy(combined + HASH_WORDS, auth_path[i], HASH_WORDS * sizeof(uint64_t)); // Sibling Hash
+            } else {
+                // Odd index: Sibling Hash first, then Computed Hash
+                memcpy(combined, auth_path[i], HASH_WORDS * sizeof(uint64_t)); // Sibling Hash
+                memcpy(combined + HASH_WORDS, current_hash, HASH_WORDS * sizeof(uint64_t)); // Computed Hash
+            }
+        }
+
+
         SHA3_host((uint8_t *)new_hash, (uint8_t *)combined, combined_size * sizeof(uint64_t), 256);
-        // printf("SHA3 Output: ");
-        // for (int j = 0; j < HASH_WORDS; j++) {
-        //     printf("%016lx ", new_hash[j]);
-        // }
-        printf("\n");
         memcpy(current_hash, new_hash, HASH_WORDS * sizeof(uint64_t));
         memset(new_hash, 0, HASH_WORDS * sizeof(uint64_t));
 
-        //Debugging
-        //if (i < 13) {
-            printf("Layer %zu Debug:\n", i);
-            printf("Combined Input: ");
-            for (size_t j = 0; j < combined_size; j++) {
-                printf("%016lx ", combined[j]);
-            }
-            printf("\nNew Current Hash: ");
-            for (int j = 0; j < HASH_WORDS; j++) {
-                printf("%016lx ", current_hash[j]);
-            }
-            printf("\n");
-        //}
-        // int found = 0;
-        // if (i + 1 < proof_len && tree[i + 1] != NULL) {  // Ensure the next layer exists
-        //     for (int node_idx = 0; node_idx < (1 << (proof_len - (i + 1))); node_idx++) {  // Approximate tree size
-        //         if (memcmp(tree[i + 1][node_idx], current_hash, HASH_WORDS * sizeof(uint64_t)) == 0) {
-        //             printf("Found hash in tree[%zu][%d] (next layer)\n", i + 1, node_idx);
-        //             found = 1;
-        //             break;
-        //         }
-        //     }
-        // }
-
-    //     if (!found) {
-    //         printf("Hash NOT found in tree at layer %zu (expected in layer %zu)\n", i, i + 1);
-    //         for(int k=0;k<FIELD_WORDS + HASH_WORDS;k++){
-    //             printf("%016lx ",tree[i+1][leaf_idx/2][k]);
-    //         }
-    //         printf("\n");
-    //     }
+        printf("Layer %zu Debug:\n", i);
+        printf("Combined Input: ");
+        for (size_t j = 0; j < combined_size; j++) {
+            printf("%016lx ", combined[j]);
+        }
+        printf("\nNew Current Hash: ");
+        for (int j = 0; j < HASH_WORDS; j++) {
+            printf("%016lx ", current_hash[j]);
+        }
+        printf("\n");
 
         free(combined);
+        leaf_idx /= 2;  // Move up the tree for the next layer
     }
 
     printf("Computed Merkle Root: ");
