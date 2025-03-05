@@ -182,7 +182,45 @@ void generate_elements(uint64_t *elements, const uint64_t *var1, const uint64_t 
         }
     }
 }
+void save_merkle_tree_to_file(uint64_t ***tree, int max_layers, int concat_words, const char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        fprintf(stderr, "Error opening file for writing\n");
+        return;
+    }
 
+    fprintf(file, "========= FULL MERKLE TREE DUMP =========\n");
+
+    for (int layer = 0; layer < max_layers; layer++) {
+        if(layer == 0 || (layer > 12)) { concat_words = 4; }
+        else { concat_words = 8; }
+        if (tree[layer] == NULL) {
+            fprintf(file, "Layer %d is NULL\n", layer);
+            continue;
+        }
+
+        int num_nodes = 1 << (max_layers - (layer)); // Approximate number of nodes
+
+        fprintf(file, "\n=== Layer %d (%d elements) ===\n", layer, num_nodes);
+        for (int node = 0; node < num_nodes; node++) {
+            if (tree[layer][node] == NULL) {
+                fprintf(file, "  Node %d: NULL\n", node);
+                continue;
+            }
+
+            fprintf(file, "  Node %d: ", node);
+            for (int j = 0; j < concat_words; j++) {
+                fprintf(file, "%016lx ", tree[layer][node][j]);
+            }
+            fprintf(file, "\n");
+        }
+    }
+
+    fprintf(file, "\n=========================================\n");
+
+    fclose(file);
+    printf("Merkle tree has been saved to %s\n", filename);
+}
 //FRI initialization
 Fri* init_fri(int initial_domain_length, int expansion_factor, int num_colinearity_tests) {
     Fri* fri = (Fri*)malloc(sizeof(Fri));
@@ -444,23 +482,7 @@ void cleanup_indices_tracker() {
 uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_t **tree_layer)
 {
     const int max_fri_domains = sizeof(preon.fri_domains) / sizeof(preon.fri_domains[0]); //should be 16 for 256-bit params 
-    int basis_len = fri_log_domain_length(fri); //basis length of initial codeword 
-    // uint64_t *eval_basis = populate_eval_basis(basis_len);
-    // if (eval_basis != NULL) {
-    //     printf("Eval basis in commit phase for basis_len %d:\n", basis_len);
-    //     for (int i = 0; i < basis_len; i++) {
-    //         printf("%016lx ", eval_basis[i]);
-    //     }
-    //     printf("\n");
-    // }
-    // assert(eval_basis != NULL && "eval_basis are not correct");
-    // uint64_t offset = get_offset_for_basis(basis_len);
-
-    // if (offset != 0) {
-    //     printf("Offset in commit phase for basis_len %d is: %016lx\n", basis_len, offset);
-    // } else {
-    //     printf("Offset in commit phase not found or is zero.\n");
-    // } 
+    int basis_len = fri_log_domain_length(fri); //basis length of initial codeword  
     uint64_t ***codewords = (uint64_t ***)malloc((fri_num_rounds(fri) + 1 /* 12 + 1 */) * sizeof(uint64_t **)); //because we want 12 codewords.
     uint64_t precomputed_inverses[max_fri_domains];
     load_precomputed_inverses("fri_inverses_256.txt", precomputed_inverses);
@@ -474,7 +496,8 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
     uint64_t *alpha = (uint64_t *) malloc (FIELD_WORDS * sizeof(uint64_t));
     uint64_t *sampled_alpha = (uint64_t *) malloc (FIELD_WORDS * sizeof(uint64_t));
     size_t N = codeword_len;
-    printf("num rounds in commit are %d\n", fri_num_rounds(fri));
+    int last_round = fri_num_rounds(fri);
+    printf("num rounds in commit are %d\n", last_round);
     size_t num_butes_alpha = 24;
     uint8_t *alpha_bytes = prover_fiat_shamir(global_proof_stream, num_butes_alpha); //initialise alpha_bytes
     field_sample(alpha_bytes, 24, elements, 256, sampled_alpha);
@@ -515,6 +538,8 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
         // for(int i = 0; i < N/2; i++){
         //     uint64_t next_layer_hash_codeword[i] = (uint64_t *)malloc((FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
         // }
+        bool is_last_round = (r == fri_num_rounds(fri) - 1); //flag to check if it is the last round
+        printf("is_last_round: %d\n", is_last_round);
         codewords[r] = codeword;
         tree[r] = tree_layer;
         int exponent = preon.fri_domains[0].basis_len - fri_log_domain_length(fri);
@@ -528,7 +553,7 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
             codeword_nxt[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
             tree_layer_nxt[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
         }
-        commit_launch(codeword, codeword_nxt, alpha, &offset, denominator_inv, eval_basis, N, root, tree_layer, tree_layer_nxt, tree);
+        commit_launch(codeword, codeword_nxt, alpha, &offset, denominator_inv, eval_basis, N, root, tree_layer, tree_layer_nxt, tree, last_round, is_last_round);
         if(N > 32) {
         N = N / 2;
         codeword = codeword_nxt;
@@ -765,7 +790,7 @@ void print_element(uint64_t *element, size_t num_words) {
 }
 
 
-int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
+int verify(Fri *fri, uint64_t **polynomial_values, int degree) { 
     uint64_t one[FIELD_WORDS];
     field_one(one, FIELD_WORDS);
     const int max_fri_domains = sizeof(preon.fri_domains) / sizeof(preon.fri_domains[0]); //should be 16 for 256-bit params 
@@ -1193,7 +1218,9 @@ void test_fri(){
     prove(fri, codeword, tree_layer);
     t_prover = clock() - t_prover;
     double time_taken_prover = ((double)t_prover)/CLOCKS_PER_SEC; // in seconds 
- 
+    
+    save_merkle_tree_to_file(tree, 17, FIELD_WORDS + HASH_WORDS, "../data/merkle_tree_dump.txt");
+
     printf("fri's prover took %f seconds to execute \n", time_taken_prover); 
     printf("Returned from prove for valid codeword\n");
     //size_t num_points = 0;

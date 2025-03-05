@@ -72,7 +72,7 @@ void load_precomputed_inverses(const char *filename, uint64_t inverses[MAX_FRI_P
 __host__ __device__ void print_codeword(uint64_t **codeword, size_t length, const size_t field_words);
 
 void calculate_indices(uint64_t *c_indices, uint64_t *a_indices, uint64_t *b_indices, int num_colinearity_tests);
-uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_t **tree_layer);
+uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_t **tree_layer, int last_round, bool is_last_round);
 size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, int current_codeword_len, uint64_t **next_codeword, size_t next_codeword_length, size_t *c_indices, int round);
 size_t* prove(Fri* fri, uint64_t **codeword, uint64_t **tree_layer);
 int verify(Fri *fri, uint64_t **polynomial_values, int degree);

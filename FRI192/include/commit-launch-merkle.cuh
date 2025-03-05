@@ -101,7 +101,7 @@ extern "C" {
         uint64_t **codeword, uint64_t **codeword_nxt, 
         uint64_t *alpha, uint64_t *offset, 
         uint64_t denominator_inv, uint64_t *eval_basis, 
-        int N, uint64_t *root, uint64_t **tree_layer, uint64_t **tree_layer_nxt, uint64_t ***tree
+        int N, uint64_t *root, uint64_t **tree_layer, uint64_t **tree_layer_nxt, uint64_t ***tree, int last_round, bool is_last_round
     );
 
 }

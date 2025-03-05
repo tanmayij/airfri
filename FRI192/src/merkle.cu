@@ -216,7 +216,7 @@ int merkle_verify(
         memcpy(current_hash, new_hash, HASH_WORDS * sizeof(uint64_t));
         memset(new_hash, 0, HASH_WORDS * sizeof(uint64_t));
 
-        // Debugging
+        //Debugging
         //if (i < 13) {
             printf("Layer %zu Debug:\n", i);
             printf("Combined Input: ");
@@ -229,11 +229,28 @@ int merkle_verify(
             }
             printf("\n");
         //}
+        // int found = 0;
+        // if (i + 1 < proof_len && tree[i + 1] != NULL) {  // Ensure the next layer exists
+        //     for (int node_idx = 0; node_idx < (1 << (proof_len - (i + 1))); node_idx++) {  // Approximate tree size
+        //         if (memcmp(tree[i + 1][node_idx], current_hash, HASH_WORDS * sizeof(uint64_t)) == 0) {
+        //             printf("Found hash in tree[%zu][%d] (next layer)\n", i + 1, node_idx);
+        //             found = 1;
+        //             break;
+        //         }
+        //     }
+        // }
+
+    //     if (!found) {
+    //         printf("Hash NOT found in tree at layer %zu (expected in layer %zu)\n", i, i + 1);
+    //         for(int k=0;k<FIELD_WORDS + HASH_WORDS;k++){
+    //             printf("%016lx ",tree[i+1][leaf_idx/2][k]);
+    //         }
+    //         printf("\n");
+    //     }
 
         free(combined);
     }
 
-    // Print final computed root
     printf("Computed Merkle Root: ");
     for (int i = 0; i < HASH_WORDS; i++) {
         printf("%016lx ", current_hash[i]);
@@ -242,7 +259,6 @@ int merkle_verify(
 
     int result = memcmp(root, current_hash, HASH_WORDS * sizeof(uint64_t)) == 0;
 
-    // Free dynamically allocated memory
     free(current_hash);
     free(new_hash);
 

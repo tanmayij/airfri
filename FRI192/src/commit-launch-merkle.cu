@@ -84,48 +84,71 @@ __global__ void commit_kernel(
     memcpy(&device_codeword_nxt[idx3], &device_temp5[idx3], field_words * sizeof(uint64_t));
 }
 
-__global__ void compute_tree_layers(uint64_t *device_codeword_nxt, uint64_t *device_layer_hashes, uint64_t *device_tree_layer,
-uint64_t *device_tree_layer_nxt, uint64_t *device_combined_sibling_codewords, uint64_t *device_concat_codeword_to_hash, uint64_t *device_digest, int N)
-{   
+
+__global__ void compute_tree_layers(
+    uint64_t *device_codeword_nxt, 
+    uint64_t *device_layer_hashes, 
+    uint64_t *device_tree_layer,
+    uint64_t *device_tree_layer_nxt, 
+    uint64_t *device_combined_sibling_codewords, 
+    uint64_t *device_concat_codeword_to_hash, 
+    uint64_t *device_digest, 
+    int N
+) {   
     size_t I = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (I >= N / 2) return;
+
     if (I < N / 2 && N == 131072) {
         int idx1 = 2 * I * FIELD_WORDS;
         int idx2 = (2 * I + 1) * FIELD_WORDS;
-        int idx3 = I * FIELD_WORDS;//for codeword_nxt element
-        int idx5 = I * HASH_WORDS; //for hash
+        int idx3 = I * FIELD_WORDS;  // for codeword_nxt element
+        int idx5 = I * HASH_WORDS;   // for hash
         int idx4 = I * (FIELD_WORDS + HASH_WORDS);
-        //step 1
-        memcpy(&device_combined_sibling_codewords[idx3], &device_tree_layer[idx1], FIELD_WORDS * sizeof(uint64_t));
-        memcpy(&device_combined_sibling_codewords[idx3 + FIELD_WORDS], &device_tree_layer[idx2], FIELD_WORDS * sizeof(uint64_t));
-        //step 2
+
+        for (int j = 0; j < FIELD_WORDS; j++) {
+            device_combined_sibling_codewords[idx3 + j] = device_tree_layer[idx1 + j];
+            device_combined_sibling_codewords[idx3 + FIELD_WORDS + j] = device_tree_layer[idx2 + j];
+        }
+
         SHA3((uint8_t *)&device_digest[idx5], (uint8_t *)&device_combined_sibling_codewords[idx3], 2 * FIELD_WORDS * sizeof(uint64_t), 256);
-        //step 3
-        memcpy(&device_concat_codeword_to_hash[idx4], &device_codeword_nxt[idx3], FIELD_WORDS * sizeof(uint64_t));
-        memcpy(&device_concat_codeword_to_hash[idx4 + FIELD_WORDS], &device_digest[idx5], HASH_WORDS * sizeof(uint64_t));
-        //step 4: future-> remove this dependency
-        memcpy(&device_tree_layer_nxt[idx4], &device_concat_codeword_to_hash[idx4], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));  
+
+        for (int j = 0; j < FIELD_WORDS; j++) {
+            device_concat_codeword_to_hash[idx4 + j] = device_codeword_nxt[idx3 + j];
+        }
+        for (int j = 0; j < HASH_WORDS; j++) {
+            device_concat_codeword_to_hash[idx4 + FIELD_WORDS + j] = device_digest[idx5 + j];
+        }
+        for (int j = 0; j < (FIELD_WORDS + HASH_WORDS); j++) {
+            device_tree_layer_nxt[idx4 + j] = device_concat_codeword_to_hash[idx4 + j];
+        }
     }
 
-    if(I < N/2 && N < 131072 && N >= 64) {
+    if (I < N / 2 && N < 131072 && N >= 64) {
         int idx1 = 2 * I * (FIELD_WORDS + HASH_WORDS);
         int idx2 = (2 * I + 1) * (FIELD_WORDS + HASH_WORDS);
-        int idx3 = I * FIELD_WORDS;//for codeword_nxt element
-        int idx5 = I * HASH_WORDS; //for hash
+        int idx3 = I * FIELD_WORDS;
+        int idx5 = I * HASH_WORDS;
         int idx4 = I * (FIELD_WORDS + HASH_WORDS);
         int idx6 = I * 2 * (FIELD_WORDS + HASH_WORDS);
-        //step 1
-        memcpy(&device_combined_sibling_codewords[idx6], &device_tree_layer[idx1], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
-        memcpy(&device_combined_sibling_codewords[idx6 + (FIELD_WORDS + HASH_WORDS)], &device_tree_layer[idx2], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
-        //step 2
-        SHA3((uint8_t *)&device_digest[idx5], (uint8_t *)&device_combined_sibling_codewords[idx6], 2 * (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t), 256);
-        //step3
-        memcpy(&device_concat_codeword_to_hash[idx4], &device_codeword_nxt[idx3], FIELD_WORDS * sizeof(uint64_t));
-        memcpy(&device_concat_codeword_to_hash[idx4 + FIELD_WORDS], &device_digest[idx5], HASH_WORDS * sizeof(uint64_t));
-        //step 4
-        memcpy(&device_tree_layer_nxt[idx4], &device_concat_codeword_to_hash[idx4], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
 
+        for (int j = 0; j < (FIELD_WORDS + HASH_WORDS); j++) {
+            device_combined_sibling_codewords[idx6 + j] = device_tree_layer[idx1 + j];
+            device_combined_sibling_codewords[idx6 + (FIELD_WORDS + HASH_WORDS) + j] = device_tree_layer[idx2 + j];
+        }
+
+        SHA3((uint8_t *)&device_digest[idx5], (uint8_t *)&device_combined_sibling_codewords[idx6], 2 * (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t), 256);
+
+        for (int j = 0; j < FIELD_WORDS; j++) {
+            device_concat_codeword_to_hash[idx4 + j] = device_codeword_nxt[idx3 + j];
+        }
+        for (int j = 0; j < HASH_WORDS; j++) {
+            device_concat_codeword_to_hash[idx4 + FIELD_WORDS + j] = device_digest[idx5 + j];
+        }
+
+        for (int j = 0; j < (FIELD_WORDS + HASH_WORDS); j++) {
+            device_tree_layer_nxt[idx4 + j] = device_concat_codeword_to_hash[idx4 + j];
+        }
     }
 }
 __global__ void merkle_kernel(
@@ -141,106 +164,70 @@ __global__ void merkle_kernel(
     int I = blockIdx.x * blockDim.x + threadIdx.x;
     int idx1, idx2, idx3, idx4;
 
-    if(I < N/2 && (N == 32 || N == 64)){ //only if N is 32 or N is 64, we use codewords
+    if (I >= N / 2) return;
+
+    if (N == 32) {  // Only if N is 32, we use codewords
         idx1 = 2 * I * (FIELD_WORDS + HASH_WORDS);
         idx2 = (2 * I + 1) * (FIELD_WORDS + HASH_WORDS);
         idx3 = I * HASH_WORDS;
-        idx4 = I * 2 * (FIELD_WORDS + HASH_WORDS);
-        //step 1
-        memcpy(&device_combined_sibling_codewords[idx4], &device_tree_layer[idx1], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
-        memcpy(&device_combined_sibling_codewords[idx4 + (FIELD_WORDS + HASH_WORDS)], &device_tree_layer[idx2], (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
+        idx4 = I * (2 * (FIELD_WORDS + HASH_WORDS));
 
-        //step 2
-        SHA3((uint8_t *)&device_digest[idx3],(uint8_t *)&device_combined_sibling_codewords[idx4], 2 * (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t), 256);
-        //step 3 - save all hashes in tree_layer_nxt
-        memcpy(&device_tree_layer_nxt[idx3], &device_digest[idx3], HASH_WORDS * sizeof(uint64_t) );
+        for (int j = 0; j < (FIELD_WORDS + HASH_WORDS); j++) {
+            device_combined_sibling_codewords[idx4 + j] = device_tree_layer[idx1 + j];
+            device_combined_sibling_codewords[idx4 + (FIELD_WORDS + HASH_WORDS) + j] = device_tree_layer[idx2 + j];
+        }
+
+        SHA3((uint8_t *)&device_digest[idx3], (uint8_t *)&device_combined_sibling_codewords[idx4], 2 * (FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t), 256);
+
+        for (int j = 0; j < HASH_WORDS; j++) {
+            device_tree_layer_nxt[idx3 + j] = device_digest[idx3 + j];
+        }
     }
 
-    if(I < N/2 && N < 32) 
-    {
-        idx1 = 2 * I * (HASH_WORDS);
-        idx2 = (2 * I + 1) * (HASH_WORDS);
+    if (N < 32) {  
+        idx1 = 2 * I * HASH_WORDS;
+        idx2 = (2 * I + 1) * HASH_WORDS;
         idx3 = I * HASH_WORDS;
-        // idx4 = I * 2 * HASH_WORDS;
-        //step 1
-        memcpy(&device_combined_sibling_hashes[idx1], &device_tree_layer[idx1], (HASH_WORDS) * sizeof(uint64_t));
-        memcpy(&device_combined_sibling_hashes[idx1 + (HASH_WORDS)], &device_tree_layer[idx2], (HASH_WORDS) * sizeof(uint64_t));
-        //step 2
-        SHA3((uint8_t *)&device_digest[idx3], (uint8_t *)&device_combined_sibling_hashes[idx3], 2 * (HASH_WORDS) * sizeof(uint64_t), 256);
-        //step 3 - save all hashes in tree_layer_nxt
-        memcpy(&device_tree_layer_nxt[idx3], &device_digest[idx3], HASH_WORDS * sizeof(uint64_t) );
 
+        for (int j = 0; j < HASH_WORDS; j++) {
+            device_combined_sibling_hashes[idx1 + j] = device_tree_layer[idx1 + j];
+            device_combined_sibling_hashes[idx1 + HASH_WORDS + j] = device_tree_layer[idx2 + j];
+        }
+
+        SHA3((uint8_t *)&device_digest[idx3], (uint8_t *)&device_combined_sibling_hashes[idx1], 
+             2 * HASH_WORDS * sizeof(uint64_t), 256);
+
+        for (int j = 0; j < HASH_WORDS; j++) {
+            device_tree_layer_nxt[idx3 + j] = device_digest[idx3 + j];
+        }
     }
-    // if (I == 0 && N == 2) {
-    //     // Combine the last two sibling hashes into device_combined_sibling_hashes
-    //     int idx1 = 0 * HASH_WORDS;            // First sibling hash
-    //     int idx2 = 1 * HASH_WORDS;            // Second sibling hash
-    //     int idx3 = 0 * HASH_WORDS;            // Output digest index
-    //     int idx4 = 0 * 2 * HASH_WORDS;        // Combined hash index
-    
-    //     // Copy the two sibling hashes into a combined buffer
-    //     memcpy(&device_combined_sibling_hashes[idx4], &device_tree_layer[idx1], HASH_WORDS * sizeof(uint64_t));
-    //     memcpy(&device_combined_sibling_hashes[idx4 + HASH_WORDS], &device_tree_layer[idx2], HASH_WORDS * sizeof(uint64_t));
-    
-    //     // Compute the SHA3 hash of the two combined sibling hashes
-    //     SHA3((uint8_t *)&device_digest[idx3], (uint8_t *)&device_combined_sibling_hashes[idx4], 2 * HASH_WORDS * sizeof(uint64_t), 256);
-    
-    //     // Store the computed root in device_merkle_root
-    //     memcpy(device_merkle_root, &device_digest[idx3], HASH_WORDS * sizeof(uint64_t));
-    // }
-//     if (I == 0 && N == 2) {
-//         // Compute Merkle root within this kernel instead of launching another one
-//         int idx1 = 0 * HASH_WORDS; 
-//         int idx2 = 1 * HASH_WORDS;
-//         int idx3 = 0 * HASH_WORDS;
-//         int idx4 = 0 * 2 * HASH_WORDS;
-
-//         uint64_t combined_sibling_hashes[2 * HASH_WORDS];
-
-//         memcpy(&combined_sibling_hashes[0], &device_tree_layer[idx1], HASH_WORDS * sizeof(uint64_t));
-//         memcpy(&combined_sibling_hashes[HASH_WORDS], &device_tree_layer[idx2], HASH_WORDS * sizeof(uint64_t));
-//         printf("combined_sibling_hashes before SHA3 in commit kernel: ");
-//         for (int j = 0; j < 2 * HASH_WORDS; j++) {
-//             printf("%016lx ", combined_sibling_hashes[j]);
-//         }
-//         printf("\n");
-//         SHA3((uint8_t *)&device_merkle_root[idx3], (uint8_t *)combined_sibling_hashes, 2 * HASH_WORDS * sizeof(uint64_t), 256);
-
-//         printf("Computed Merkle Root inside kernel: ");
-//         for (int j = 0; j < HASH_WORDS; j++) {
-//             printf("%016lx ", device_merkle_root[j]);
-//         }
-//         printf("\n");
-//     }
 }
+
 
 __global__ void compute_merkle_root_kernel(
     uint64_t *device_tree_layer,    // Input: layer with two sibling hashes
-    uint64_t *device_merkle_root   // Output: the Merkle root
+    uint64_t *device_merkle_root    // Output: the Merkle root
 ) {
     if (threadIdx.x == 0) {
-        // Indices for the two sibling hashes
-        int idx1 = 0 * HASH_WORDS;
-        int idx2 = 1 * HASH_WORDS;
+        int idx1 = 0 * HASH_WORDS; // First sibling hash
+        int idx2 = 1 * HASH_WORDS; // Second sibling hash
 
-        // Combined buffer for the two sibling hashes
         uint64_t combined_sibling_hashes[2 * HASH_WORDS];
 
-        // Copy the sibling hashes into the combined buffer
-        memcpy(&combined_sibling_hashes[0], &device_tree_layer[idx1], HASH_WORDS * sizeof(uint64_t));
-        memcpy(&combined_sibling_hashes[HASH_WORDS], &device_tree_layer[idx2], HASH_WORDS * sizeof(uint64_t));
+        for (int j = 0; j < HASH_WORDS; j++) {
+            combined_sibling_hashes[j] = device_tree_layer[idx1 + j];
+            combined_sibling_hashes[HASH_WORDS + j] = device_tree_layer[idx2 + j];
+        }
+
         printf("combined_sibling_hashes before SHA3 in commit kernel: ");
         for (int j = 0; j < 2 * HASH_WORDS; j++) {
             printf("%016lx ", combined_sibling_hashes[j]);
         }
         printf("\n");
-        // Compute the Merkle root using SHA3
-        SHA3(
-            (uint8_t *)device_merkle_root,                  // Destination: Merkle root
-            (uint8_t *)combined_sibling_hashes,            // Source: Combined sibling hashes
-            2 * HASH_WORDS * sizeof(uint64_t),             // Input size: 2 sibling hashes
-            256                                            // Output size: 256 bits
-        );
+
+        SHA3((uint8_t *)device_merkle_root, (uint8_t *)combined_sibling_hashes, 
+             2 * HASH_WORDS * sizeof(uint64_t), 256);
+
         printf("Computed Merkle Root inside kernel: ");
         for (int j = 0; j < HASH_WORDS; j++) {
             printf("%016lx ", device_merkle_root[j]);
@@ -248,18 +235,52 @@ __global__ void compute_merkle_root_kernel(
         printf("\n");
     }
 }
+// __global__ void compute_merkle_root_kernel(
+//     uint64_t *device_tree_layer,    // Input: layer with two sibling hashes
+//     uint64_t *device_merkle_root   // Output: the Merkle root
+// ) {
+//     if (threadIdx.x == 0) {
+//         // Indices for the two sibling hashes
+//         int idx1 = 0 * HASH_WORDS;
+//         int idx2 = 1 * HASH_WORDS;
+
+//         // Combined buffer for the two sibling hashes
+//         uint64_t combined_sibling_hashes[2 * HASH_WORDS];
+
+//         // Copy the sibling hashes into the combined buffer
+//         memcpy(&combined_sibling_hashes[0], &device_tree_layer[idx1], HASH_WORDS * sizeof(uint64_t));
+//         memcpy(&combined_sibling_hashes[HASH_WORDS], &device_tree_layer[idx2], HASH_WORDS * sizeof(uint64_t));
+//         printf("combined_sibling_hashes before SHA3 in commit kernel: ");
+//         for (int j = 0; j < 2 * HASH_WORDS; j++) {
+//             printf("%016lx ", combined_sibling_hashes[j]);
+//         }
+//         printf("\n");
+//         // Compute the Merkle root using SHA3
+//         SHA3(
+//             (uint8_t *)device_merkle_root,                  // Destination: Merkle root
+//             (uint8_t *)combined_sibling_hashes,            // Source: Combined sibling hashes
+//             2 * HASH_WORDS * sizeof(uint64_t),             // Input size: 2 sibling hashes
+//             256                                            // Output size: 256 bits
+//         );
+//         printf("Computed Merkle Root inside kernel: ");
+//         for (int j = 0; j < HASH_WORDS; j++) {
+//             printf("%016lx ", device_merkle_root[j]);
+//         }
+//         printf("\n");
+//     }
+// }
 
 void commit_launch(
     uint64_t **codeword, uint64_t **codeword_nxt, 
     uint64_t *alpha, uint64_t *offset, 
     uint64_t denominator_inv, uint64_t *eval_basis, 
-    int N, uint64_t *root, uint64_t **tree_layer, uint64_t **tree_layer_nxt, uint64_t ***tree
+    int N, uint64_t *root, uint64_t **tree_layer, uint64_t **tree_layer_nxt, uint64_t ***tree, int last_round, bool is_last_round
 ) {
     printf("Starting commit_launch\n");
     printf("N = %d, FIELD_WORDS = %d\n", N, FIELD_WORDS);
     int basis_len = (int)log2(N);
     printf("basis len: %d\n", basis_len);
-
+    printf("last round: %d\n", last_round);
     // if (N == 131072) {
     //     initialize_file("temp1.txt");
     //     initialize_file("temp2.txt");
@@ -303,7 +324,7 @@ void commit_launch(
         }
     }
     printf("First few flattened tree_layer values:\n");
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 16; ++i) {
         printf("%016lx ", flattened_tree_layer[i]);
     }
     printf("\n");
@@ -322,7 +343,7 @@ void commit_launch(
         }
     }
     printf("First few flattened tree_layer values:\n");
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 16; ++i) {
         printf("%016lx ", flattened_tree_layer[i]);
     }
     printf("\n");
@@ -504,20 +525,15 @@ void commit_launch(
         printf("%016lx ", flattened_tree_layer_nxt[i]);
     }
     printf("\n");
-    if(N!=64){
+    if(!is_last_round){
     free(flattened_tree_layer_nxt);
     }
     cudaFree(device_tree_layer);
     cudaFree(device_tree_layer_nxt);
-    // write_to_file("temp1.txt", flattened_temp1, FIELD_WORDS, N/2);
-    // write_to_file("temp2.txt", flattened_temp2, FIELD_WORDS, N/2);
-    // write_to_file("temp3.txt", flattened_temp3, FIELD_WORDS, N/2);
-    // write_to_file("temp4.txt", flattened_temp4, FIELD_WORDS, N/2);
-    // write_to_file("temp5.txt", flattened_temp5, FIELD_WORDS, N/2);
-    // write_to_file("alpha_offset.txt", flattened_alpha_offset, FIELD_WORDS, N/2);
 
-    if (N == 64) { 
-        int tree_idx = 12;  //start with layer 12 for N == 64
+    if (is_last_round) { 
+        
+        int tree_idx = last_round;  //start with layer 12 which holds 32 elements
         int next_N = N / 2; //initialize to 32 for the next layer size
         
         //first transfer the tree_layer_nxt elements to tree[12]
@@ -528,51 +544,51 @@ void commit_launch(
                 tree[tree_idx][i][j] = flattened_tree_layer_nxt[i * CONCAT_WORDS + j];
             }
         }
-        // printf("\n=== DEBUG: flattened_tree_layer_nxt After Storing in tree[%d] ===\n", tree_idx); //to check if the elements have codewords in them
-        // for (int i = 0; i < next_N; i++) {
-        //     printf("Index %d: ", i);
-        //     for (int j = 0; j < CONCAT_WORDS; j++) {
-        //         printf("%016lx ", flattened_tree_layer_nxt[i * CONCAT_WORDS + j]);
-        //     }
-        //     printf("\n");
-        // }
-        //free this so it can be re-initialized below
-        free(flattened_tree_layer_nxt);
-        //allocate flattened memory for device -> host transfer
-        uint64_t *flattened_tree_layer_nxt = (uint64_t *)malloc((N / 2) * CONCAT_WORDS * sizeof(uint64_t));
+        printf("\n=== DEBUG: flattened_tree_layer_nxt After Storing in tree[%d] ===\n", tree_idx); //to check if the elements have codewords in them
+        for (int i = 0; i < next_N; i++) {
+            printf("Index %d: ", i);
+            for (int j = 0; j < CONCAT_WORDS; j++) {
+                printf("%016lx ", flattened_tree_layer_nxt[i * CONCAT_WORDS + j]);
+            }
+            printf("\n");
+        }
+        /*steps:
+        1. tree[12] is filled, flattened_tree_layer_nxt has 32 elements now
+        2. allocate memory to device variables tree and tree_nxt (host to device)
+        3.copy device_tree_layer = flattened_tree_layer_nxt
+        4.realloc memory for flattened_tree_layer and flattened_tree_layer_nxt
+        5. then launch merkle_kernel  */
     
-        //step 1: unflatten tree_layer_nxt computed by commit_kernel and assign it to tree[12]
-        cudaMalloc((void **)&device_tree_layer, (N) * CONCAT_WORDS * sizeof(uint64_t));
-        cudaMalloc((void **)&device_tree_layer_nxt, (N / 2) * CONCAT_WORDS * sizeof(uint64_t));
-        cudaMemcpy(flattened_tree_layer_nxt, device_tree_layer_nxt, (N / 2) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
+        //copy the tree_layer_nxt to tree_layer
+        cudaMalloc((void **)&device_tree_layer, (next_N) * CONCAT_WORDS * sizeof(uint64_t));
+        cudaMalloc((void **)&device_tree_layer_nxt, (next_N / 2) * CONCAT_WORDS * sizeof(uint64_t)); //will be computed in the next few lines
+        cudaMemcpy(device_tree_layer, flattened_tree_layer_nxt, (next_N) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyHostToDevice);
     
-        // tree[tree_idx] = (uint64_t **)malloc((next_N) * sizeof(uint64_t *));
-        // for (int i = 0; i < next_N; i++) {
-        //     tree[tree_idx][i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));
-        //     for (int j = 0; j < CONCAT_WORDS; j++) {
-        //         tree[tree_idx][i][j] = flattened_tree_layer_nxt[i * CONCAT_WORDS + j];
-        //     }
-        // }
-        tree_idx++;  // Move to the next tree layer index
+        //now, flattened_tree_layer will be 32 and flattened_tree_layer_nxt will be 16
+        flattened_tree_layer = (uint64_t *)realloc(flattened_tree_layer, (next_N) * CONCAT_WORDS * sizeof(uint64_t));
+        flattened_tree_layer_nxt = (uint64_t *)realloc(flattened_tree_layer_nxt, (next_N / 2) * CONCAT_WORDS * sizeof(uint64_t));
+       
+        tree_idx++;  //move to the next tree layer index, which is 13
 
-        // Step 2: transfer 
-        cudaMemcpy(device_tree_layer, device_tree_layer_nxt, (next_N / 2) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToDevice);
-        merkle_kernel<<<2, 32>>>(
-            device_layer_hashes, 
-            device_merkle_root, 
-            device_tree_layer, 
-            device_tree_layer_nxt, 
-            device_combined_sibling_codewords, 
-            device_digest, 
-            device_combined_sibling_hashes, 
-            next_N
-        );
-        cudaDeviceSynchronize();
-        //transfer device_tree_layer here 
-        cudaMemcpy(device_tree_layer, device_tree_layer_nxt, (next_N / 2) * HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToDevice);
+        // // Step 3: transfer 
+        // cudaMemcpy(device_tree_layer, device_tree_layer_nxt, (next_N / 2) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToDevice);
+        // merkle_kernel<<<2, 32>>>(
+        //     device_layer_hashes, 
+        //     device_merkle_root, 
+        //     device_tree_layer, 
+        //     device_tree_layer_nxt, 
+        //     device_combined_sibling_codewords, 
+        //     device_digest, 
+        //     device_combined_sibling_hashes, 
+        //     next_N
+        // );
+        // cudaDeviceSynchronize();
+        // //transfer device_tree_layer here 
+        // cudaMemcpy(device_tree_layer, device_tree_layer_nxt, (next_N / 2) * HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToDevice);
 
         //step 3: Loop over remaining layers, updating tree[layer] with each iteration
         while (next_N > 2) {
+
             int tpb = min(32, next_N / 2);
             if(tpb == 0) {tpb = 1;}
             int nb = (next_N + tpb - 1) / tpb;
@@ -581,11 +597,10 @@ void commit_launch(
             merkle_kernel<<<nb, tpb>>>(device_layer_hashes, device_merkle_root, device_tree_layer, device_tree_layer_nxt, device_combined_sibling_codewords, device_digest, device_combined_sibling_hashes, next_N);
             cudaDeviceSynchronize();
             
-            
             //cudaMalloc((void **)&device_tree_layer_nxt, (next_N / 2) * HASH_WORDS * sizeof(uint64_t));
             cudaMemcpy(flattened_tree_layer_nxt, device_tree_layer_nxt, (next_N / 2) * HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
             printf("First few tree_layer_nxt values in the looooop:\n");
-            for (int i = 0; i < HASH_WORDS + 4; i++) {
+            for (int i = 0; i < HASH_WORDS * 4; i++) {
                 printf("%016lx ", flattened_tree_layer_nxt[i]);
             }
             printf("\n");
@@ -602,7 +617,7 @@ void commit_launch(
             device_tree_layer = device_tree_layer_nxt;
             device_tree_layer_nxt = temp;
             tree_idx++;
-            
+            flattened_tree_layer_nxt = (uint64_t *)realloc(flattened_tree_layer_nxt, (next_N / 2) * CONCAT_WORDS * sizeof(uint64_t));
             //step 4: Update device_tree_layer with the contents of device_tree_layer_nxt
             //cudaMemcpy(device_tree_layer, device_tree_layer_nxt, (next_N / 2) * HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToDevice);
 
