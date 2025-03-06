@@ -1,3 +1,0 @@
-[submodule "cantor-fft"]
-	path = cantor-fft
-	url = https://github.com/mtbadakhshan/additive-fft.git
