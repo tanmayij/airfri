@@ -159,7 +159,7 @@ void fft(uint64_t *result, const uint64_t *v, const size_t v_len, const size_t f
     assert(recursed_betas_ptr == 0);
 
     free(recursed_betas);
-    free(recursed_shifts);
+   //free(recursed_shifts);
     free(betas2);
     free(shift2);
 }

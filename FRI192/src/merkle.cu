@@ -115,6 +115,7 @@ void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t
                 exit(1);
             }
             //Copy the codeword element from the current index (skipping the hash part)
+
             memcpy(auth_path[*proof_len], tree[i][current_index], FIELD_WORDS * sizeof(uint64_t));
             memcpy(auth_path[*proof_len] + FIELD_WORDS, tree[i][sibling_index], sibling_size * sizeof(uint64_t));
 
@@ -323,10 +324,16 @@ int merkle_verify(
             }
         
             if (is_even) {
+                for(int k=0;k<FIELD_WORDS;k++){
+                    printf("leaf[%d]: %016lx\n",k,current_hash[k]);
+                }
                 //even index: Computed Hash first, then Lone Codeword
                 memcpy(combined, current_hash, FIELD_WORDS * sizeof(uint64_t)); //computed_hash = leaf_idx here
                 memcpy(combined + FIELD_WORDS, auth_path[i], FIELD_WORDS * sizeof(uint64_t)); //other codeword
             } else {
+                for(int k=0;k<FIELD_WORDS;k++){
+                    printf("leaf[%d]: %016lx\n",k,current_hash[k]);
+                }
                 //odd index: Lone Codeword first, then Computed Hash
                 memcpy(combined, auth_path[i], FIELD_WORDS * sizeof(uint64_t)); // Lone Codeword
                 memcpy(combined + FIELD_WORDS, current_hash, FIELD_WORDS * sizeof(uint64_t)); // Computed Hash
@@ -343,6 +350,9 @@ int merkle_verify(
                 free(current_hash);
                 free(new_hash);
                 exit(1);
+            }
+            for(int k=0;k<FIELD_WORDS;k++){
+                printf("leaf[%d]: %016lx\n",k,current_hash[k]);
             }
             if (is_even) {
                 //Even index: Lone Codeword + Computed Hash + (Codeword + Hashword)

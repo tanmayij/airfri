@@ -1,7 +1,0 @@
-*.sage.py
-C++/build/
-.vscode/
-
-*.o
-*.out
-C/bitpolymul/

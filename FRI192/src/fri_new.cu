@@ -15,6 +15,8 @@
 #include "../include/domain.cuh"
 #include "../include/commit-launch-merkle.cuh"
 #include "../include/poly-eval-launch.cuh"
+#include "../cantor-fft/C++/Cantor/cantor_basis.hpp"
+
 #define FIELD_WORDS 4
 ProofStream* global_proof_stream = NULL;
 QueryIndices global_query_indices;
@@ -30,6 +32,27 @@ uint64_t ***tree = (uint64_t ***)malloc(MAX_PROOF_PATH_LENGTH + 1 * sizeof(uint6
 //     const uint64_t *shift;
 // } Domain;
 // Function to populate an eval basis array with non-zero basis elements for a given basis_len
+
+extern uint64_t cantor_in_gf2to256[32][4];
+
+uint64_t* flatten_cantor_in_gf2to256() {
+    size_t total_elements = 32 * 4;
+    uint64_t *all_cantor_bases = (uint64_t *)malloc(total_elements * sizeof(uint64_t));
+    if (all_cantor_bases == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed for all_bases\n");
+        return NULL;
+    }
+
+    int index = 0;
+    for (size_t i = 0; i < 32; i++) {
+        for (size_t j = 0; j < 4; j++) {
+            all_cantor_bases[index++] = cantor_in_gf2to256[i][j];
+        }
+    }
+
+    return all_cantor_bases;
+}
+
 uint64_t* populate_eval_basis(int basis_len) {
     int found = -1;
     // int max_basis_len = 80;
@@ -182,7 +205,45 @@ void generate_elements(uint64_t *elements, const uint64_t *var1, const uint64_t 
         }
     }
 }
+void save_merkle_tree_to_file(uint64_t ***tree, int max_layers, int concat_words, const char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        fprintf(stderr, "Error opening file for writing\n");
+        return;
+    }
 
+    fprintf(file, "========= FULL MERKLE TREE DUMP =========\n");
+
+    for (int layer = 0; layer < max_layers; layer++) {
+        if(layer == 0 || (layer > 12)) { concat_words = 4; }
+        else { concat_words = 8; }
+        if (tree[layer] == NULL) {
+            fprintf(file, "Layer %d is NULL\n", layer);
+            continue;
+        }
+
+        int num_nodes = 1 << (max_layers - (layer)); // Approximate number of nodes
+
+        fprintf(file, "\n=== Layer %d (%d elements) ===\n", layer, num_nodes);
+        for (int node = 0; node < num_nodes; node++) {
+            if (tree[layer][node] == NULL) {
+                fprintf(file, "  Node %d: NULL\n", node);
+                continue;
+            }
+
+            fprintf(file, "  Node %d: ", node);
+            for (int j = 0; j < concat_words; j++) {
+                fprintf(file, "%016lx ", tree[layer][node][j]);
+            }
+            fprintf(file, "\n");
+        }
+    }
+
+    fprintf(file, "\n=========================================\n");
+
+    fclose(file);
+    printf("Merkle tree has been saved to %s\n", filename);
+}
 //FRI initialization
 Fri* init_fri(int initial_domain_length, int expansion_factor, int num_colinearity_tests) {
     Fri* fri = (Fri*)malloc(sizeof(Fri));
@@ -195,7 +256,7 @@ Fri* init_fri(int initial_domain_length, int expansion_factor, int num_colineari
 //the below function computes the number of rounds in the protocol. it should be 12 consistently. 
 int fri_num_rounds(Fri* fri) {
     int codeword_length = fri->initial_domain_length;
-    printf("Initial codeword length: %d\n", codeword_length);
+    //printf("Initial codeword length: %d\n", codeword_length);
 
     int num_rounds = 0;
     int max_rounds = 12;  //set the maximum number of rounds to 12
@@ -206,7 +267,7 @@ int fri_num_rounds(Fri* fri) {
         num_rounds += 1;
     }
 
-    printf("Final codeword length after %d rounds: %d\n", num_rounds, codeword_length);
+    //printf("Final codeword length after %d rounds: %d\n", num_rounds, codeword_length);
     return num_rounds;
 }
 
@@ -444,23 +505,7 @@ void cleanup_indices_tracker() {
 uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_t **tree_layer)
 {
     const int max_fri_domains = sizeof(preon.fri_domains) / sizeof(preon.fri_domains[0]); //should be 16 for 256-bit params 
-    int basis_len = fri_log_domain_length(fri); //basis length of initial codeword 
-    // uint64_t *eval_basis = populate_eval_basis(basis_len);
-    // if (eval_basis != NULL) {
-    //     printf("Eval basis in commit phase for basis_len %d:\n", basis_len);
-    //     for (int i = 0; i < basis_len; i++) {
-    //         printf("%016lx ", eval_basis[i]);
-    //     }
-    //     printf("\n");
-    // }
-    // assert(eval_basis != NULL && "eval_basis are not correct");
-    // uint64_t offset = get_offset_for_basis(basis_len);
-
-    // if (offset != 0) {
-    //     printf("Offset in commit phase for basis_len %d is: %016lx\n", basis_len, offset);
-    // } else {
-    //     printf("Offset in commit phase not found or is zero.\n");
-    // } 
+    int basis_len = fri_log_domain_length(fri); //basis length of initial codeword  
     uint64_t ***codewords = (uint64_t ***)malloc((fri_num_rounds(fri) + 1 /* 12 + 1 */) * sizeof(uint64_t **)); //because we want 12 codewords.
     uint64_t precomputed_inverses[max_fri_domains];
     load_precomputed_inverses("fri_inverses_256.txt", precomputed_inverses);
@@ -474,7 +519,8 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
     uint64_t *alpha = (uint64_t *) malloc (FIELD_WORDS * sizeof(uint64_t));
     uint64_t *sampled_alpha = (uint64_t *) malloc (FIELD_WORDS * sizeof(uint64_t));
     size_t N = codeword_len;
-    printf("num rounds in commit are %d\n", fri_num_rounds(fri));
+    int last_round = fri_num_rounds(fri);
+    printf("num rounds in commit are %d\n", last_round);
     size_t num_butes_alpha = 24;
     uint8_t *alpha_bytes = prover_fiat_shamir(global_proof_stream, num_butes_alpha); //initialise alpha_bytes
     field_sample(alpha_bytes, 24, elements, 256, sampled_alpha);
@@ -515,6 +561,8 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
         // for(int i = 0; i < N/2; i++){
         //     uint64_t next_layer_hash_codeword[i] = (uint64_t *)malloc((FIELD_WORDS + HASH_WORDS) * sizeof(uint64_t));
         // }
+        bool is_last_round = (r == fri_num_rounds(fri) - 1); //flag to check if it is the last round
+        printf("is_last_round: %d\n", is_last_round);
         codewords[r] = codeword;
         tree[r] = tree_layer;
         int exponent = preon.fri_domains[0].basis_len - fri_log_domain_length(fri);
@@ -528,7 +576,7 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
             codeword_nxt[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
             tree_layer_nxt[i] = (uint64_t *)malloc(FIELD_WORDS * sizeof(uint64_t));
         }
-        commit_launch(codeword, codeword_nxt, alpha, &offset, denominator_inv, eval_basis, N, root, tree_layer, tree_layer_nxt, tree, fri->initial_domain_length, fri->initial_domain_length >> fri_num_rounds(fri));
+        commit_launch(codeword, codeword_nxt, alpha, &offset, denominator_inv, eval_basis, N, root, tree_layer, tree_layer_nxt, tree, last_round, is_last_round);
         if(N > 32) {
         N = N / 2;
         codeword = codeword_nxt;
@@ -551,9 +599,9 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
         printf("%016lx ", root[i]);
     }
     printf("\n");
-    printf("Checking if tree[17] has Root of FRI:\n");
+    printf("Checking if tree[16] has Root of FRI:\n");
     for (size_t i = 0; i < HASH_WORDS; i++) {  
-        printf("%016lx ", tree[17][0][i]);
+        printf("%016lx ", tree[16][0][i]);
     }
     printf("\n");
     printf("Push successful\n");
@@ -625,7 +673,7 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
     global_query_indices.b_indices, global_query_indices.num_colinearity_tests);
 
     //the below loop is going to run for each round, for the total number of tests. 
-    for(int s = 0; s < num_tests; s++){
+    for(int s = 0; s < num_tests; s++){ 
         push_object(global_proof_stream, current_codeword[global_query_indices.a_indices[s]]);
         print_field("current_codeword[a_indices[s]]", current_codeword[global_query_indices.a_indices[s]], field_words);
         push_count++;
@@ -642,7 +690,7 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         size_t proof_len_a = 0;
         uint64_t **auth_path_a = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
         size_t *proof_len_ptr_a = (size_t *)malloc(sizeof(size_t));
-        // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
+        // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) { 
         // auth_path_a[i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));  
         // }
         merkle_open(auth_path_a, global_query_indices.a_indices[s], &proof_len_a, tree, round);
@@ -765,7 +813,7 @@ void print_element(uint64_t *element, size_t num_words) {
 }
 
 
-int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
+int verify(Fri *fri, uint64_t **polynomial_values, int degree) { 
     uint64_t one[FIELD_WORDS];
     field_one(one, FIELD_WORDS);
     const int max_fri_domains = sizeof(preon.fri_domains) / sizeof(preon.fri_domains[0]); //should be 16 for 256-bit params 
@@ -1007,7 +1055,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
                 free(last_domain_elements);
                 return 0;
             }
-
+            printf("Colinearity check passed");
             //check auth_path_a
             uint64_t **auth_path_a = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
             for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
@@ -1016,6 +1064,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
 
             size_t *proof_len_ptr_a = (size_t *)pull_object(global_proof_stream);
             size_t proof_len_a = *proof_len_ptr_a;
+            printf("proof len a here is: %zu \n", proof_len_a);
             for (size_t i = 0; i < proof_len_a; i++) {
                 auth_path_a[i] = (uint64_t *)pull_object(global_proof_stream);
             }
@@ -1026,14 +1075,13 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
 
                 size_t element_size;
                 if (i == 0) {
-                    element_size = FIELD_WORDS; // Layer 0: Only the sibling (FIELD_WORDS size)
+                    element_size = FIELD_WORDS; //Layer 0: Only the sibling (FIELD_WORDS size)
                 } else if (i < 13) {
-                    element_size = FIELD_WORDS + FIELD_WORDS + HASH_WORDS; // Layers 1-12: Sibling includes FIELD_WORDS + HASH_WORDS
+                    element_size = FIELD_WORDS + FIELD_WORDS + HASH_WORDS; //Layers 1-12: Sibling includes FIELD_WORDS + HASH_WORDS
                 } else {
-                    element_size = HASH_WORDS; // Layers 13-16: Only the sibling hash (HASH_WORDS size)
+                    element_size = HASH_WORDS; //Layers 13-16: Only the sibling hash (HASH_WORDS size)
                 }
 
-                // Print each element in the current auth_path layer
                 for (size_t j = 0; j < element_size; j++) {
                     printf("%016lx ", auth_path_a[i][j]);
                 }
@@ -1130,7 +1178,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
 }
 
 void test_fri(){
-    int degree = 4095;
+    int degree = 4095; //hardcoded for L3 security parameters 
     int expansion_factor = 32;
     int num_colinearity_tests = 13;
 
@@ -1138,10 +1186,10 @@ void test_fri(){
     printf("initial domain length test_fri: %d\n", initial_domain_length);
     int log_codeword_length = (int)log2(initial_domain_length);
     int basis_len = log_codeword_length;
-    uint64_t *eval_basis = populate_eval_basis(basis_len);
-    uint64_t offset = get_offset_for_basis(basis_len);
+    uint64_t *eval_basis = cantor_in_gf2to256[0]; 
+    //uint64_t offset = get_offset_for_basis(basis_len);
     assert(eval_basis != NULL);
-    assert(offset != NULL);
+    //assert(offset != NULL);
 
     Fri *fri = init_fri(initial_domain_length, expansion_factor, num_colinearity_tests);
     assert(fri != NULL);
@@ -1152,9 +1200,9 @@ void test_fri(){
     int total_elements;
     uint64_t *all_bases = populate_all_bases(&total_elements);
 
-    uint64_t poly_coeffs[initial_domain_length >> fri_num_rounds(fri)];
+    uint64_t poly_coeffs[initial_domain_length >> fri_num_rounds(fri)]; //32
     for(int i=0; i< initial_domain_length >> fri_num_rounds(fri); i++){
-        memcpy(&poly_coeffs[i], &all_bases[i], sizeof(uint64_t));
+        memcpy(&poly_coeffs[i], &all_cantor_bases[i], sizeof(uint64_t));
     }
     uint64_t **domain_elements = (uint64_t **)malloc(initial_domain_length * sizeof(uint64_t *));
 
@@ -1164,10 +1212,9 @@ void test_fri(){
         uint64_t temp[field_words];
         i_th_ele_in_span(temp, eval_basis, MAX_EVAL_BASIS_LEN, i);
         //print_field("temp", temp, FIELD_WORDS);
-        field_add(domain_elements[i], &offset, temp, field_words);
+        //field_add(domain_elements[i], &offset, temp, field_words);
         //print_field("domain_elements[i]", domain_elements[i], FIELD_WORDS);
     }
-    // Evaluate polynomial over the domain
     uint64_t **codeword = (uint64_t **)malloc(initial_domain_length * sizeof(uint64_t *));
     uint64_t **tree_layer = (uint64_t **)malloc(initial_domain_length * sizeof(uint64_t *));
     for (int i = 0; i < initial_domain_length; i++) {
@@ -1183,7 +1230,7 @@ void test_fri(){
     for (int i = 0; i < initial_domain_length; i++) {
         memcpy(tree_layer[i], codeword[i], FIELD_WORDS * sizeof(uint64_t));
     }
-    // Test valid codeword
+    //Test valid codeword
     printf("Testing valid codeword ...\n");
     printf("Calling prove\n");
     // for (int i = 0; i < initial_domain_length; i++) {
@@ -1194,7 +1241,9 @@ void test_fri(){
     prove(fri, codeword, tree_layer);
     t_prover = clock() - t_prover;
     double time_taken_prover = ((double)t_prover)/CLOCKS_PER_SEC; // in seconds 
- 
+    
+    save_merkle_tree_to_file(tree, 17, FIELD_WORDS + HASH_WORDS, "../data/merkle_tree_dump.txt");
+
     printf("fri's prover took %f seconds to execute \n", time_taken_prover); 
     printf("Returned from prove for valid codeword\n");
     //size_t num_points = 0;
@@ -1234,7 +1283,7 @@ void test_fri(){
     for (int i = 0; i < 13; i++) {
         uint64_t temp[FIELD_WORDS];
         i_th_ele_in_span(temp, eval_basis, MAX_EVAL_BASIS_LEN, i);
-        field_add(temp, &offset, temp, field_words);
+        //field_add(temp, &offset, temp, field_words);
 
         uint64_t eval_result[FIELD_WORDS];
         poly_eval(eval_result, poly_coeffs, max_basis_len, temp, field_words);
@@ -1261,7 +1310,7 @@ void test_fri(){
     //     fprintf(stderr, "Proof should fail, but is accepted ...\n");
     //     exit(EXIT_FAILURE);
     // }
-    // printf("Success! \\o/\n");
+    //printf("Success! \\o/\n");
 
 }
 

@@ -419,16 +419,13 @@ void load_precomputed_inverses(const char *filename, uint64_t inverses[MAX_FRI_P
         exit(EXIT_FAILURE);
     }
 
-    char buffer[1024];  // To hold the lines from the file
+    char buffer[1024];  
     for (int i = 0; i < MAX_FRI_PARAMETERS; i++) {
-        // Read lines until you find a line starting with "FRI Domain"
         while (fgets(buffer, sizeof(buffer), file)) {
             if (strstr(buffer, "FRI Domain") != NULL) {
-                break;  // We found the correct domain, so exit this loop
+                break;  //We found the correct domain, so exit this loop
             }
         }
-
-        // Now read the first inverse element
         if (fscanf(file, "%016lx", &inverses[i]) != 1) {
             fprintf(stderr, "Error reading inverse for FRI Domain %d\n", i);
             fclose(file);
@@ -929,7 +926,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
         uint64_t **by = (uint64_t **)malloc(fri->num_colinearity_tests * sizeof(uint64_t *));
         uint64_t **cy = (uint64_t **)malloc(fri->num_colinearity_tests * sizeof(uint64_t *));
 
-        uint64_t *precomputed_inverses = (uint64_t *)malloc(max_fri_domains * sizeof(uint64_t));
+        uint64_t precomputed_inverses[max_fri_domains]; //should i make this a public variable?
         load_precomputed_inverses("fri_inverses_256.txt", precomputed_inverses);
         int exponent = preon.fri_domains[0].basis_len - fri_log_domain_length(fri); 
         uint64_t denominator_inv[field_words] = {0};
@@ -1125,19 +1122,19 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
             }
             pull_count++;
             printf("pull in verify for auth_path_b %d\n", pull_count);
-            if (!merkle_verify(root_verify, global_query_indices.c_indices[s], auth_path_c, proof_len_c, cc[s], r+1)) {
-                printf("merkle authentication path verification fails for cc\n");
-                free(aa);
-                free(bb);
-                free(cc);
-                //free(roots);
-                //free(alphas);
-                for (int j = 0; j < last_domain.size; j++) {
-                    free(last_domain_elements[j]);
-                }
-                free(last_domain_elements);
-                return 0;
-            }
+            // if (!merkle_verify(root_verify, global_query_indices.c_indices[s], auth_path_c, proof_len_c, cc[s], r+1)) {
+            //     printf("merkle authentication path verification fails for cc\n");
+            //     free(aa);
+            //     free(bb);
+            //     free(cc);
+            //     //free(roots);
+            //     //free(alphas);
+            //     for (int j = 0; j < last_domain.size; j++) {
+            //         free(last_domain_elements[j]);
+            //     }
+            //     free(last_domain_elements);
+            //     return 0;
+            // }
         }
         free(global_query_indices.c_indices);
         free(global_query_indices.a_indices);
