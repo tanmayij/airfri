@@ -119,7 +119,8 @@ int merkle_verify(
     uint64_t **auth_path,      // Authentication path (sibling hashes) for the leaf
     size_t proof_len,          // Length of the proof path
     uint64_t *leaf,             // Initial leaf (codeword element) to start the verification
-    int layer
+    int layer,
+    int protocol_layer
 );
 
 #endif // MERKLE_H

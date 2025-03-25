@@ -762,7 +762,7 @@ size_t* prove(Fri* fri, uint64_t **codeword, uint64_t **tree_layer) {
 
     size_t codeword_length = 0;
     while (codeword[codeword_length] != NULL) codeword_length++;
-    load_precomputed_inverses("fri_inverses_256.txt");
+    load_precomputed_inverses("src/fri_inverses_256.txt");
     global_proof_stream = create_proof_stream();
     uint64_t ***codewords = commit_host(fri, codeword, codeword_length, tree_layer);
 
@@ -1081,8 +1081,8 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
             }
             printf("End of Authentication Path.\n");
             printf("pull in verify for auth_path_a %d\n", pull_count);
-
-            if (!merkle_verify(root_verify, global_query_indices.a_indices[s], auth_path_a, proof_len_a, aa[s], r)) {
+            if(r == 0) {
+            if (!merkle_verify(root_verify, global_query_indices.a_indices[s], auth_path_a, proof_len_a, aa[s], r, r)) {
                 printf("merkle authentication path verification fails for aa\n");
                 free(aa);
                 free(bb);
@@ -1093,6 +1093,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
                 }
                 free(last_domain_elements);
                 return 0;
+            }
             }
 
             // Free auth_path_a after use
@@ -1113,7 +1114,8 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
             }
             pull_count++;
             printf("pull in verify for auth_path_b %d\n", pull_count);
-            if (!merkle_verify(root_verify, global_query_indices.b_indices[s], auth_path_b, proof_len_b, bb[s], r)) {
+            if(r == 0) {
+            if (!merkle_verify(root_verify, global_query_indices.b_indices[s], auth_path_b, proof_len_b, bb[s], r, r)) {
                 printf("merkle authentication path verification fails for bb\n");
                 free(aa);
                 free(bb);
@@ -1126,7 +1128,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
                 free(last_domain_elements);
                 return 0;
             }
-
+            }
             //verify auth_path_c
             uint64_t **auth_path_c = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
             for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
@@ -1140,7 +1142,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
             }
             pull_count++;
             printf("pull in verify for auth_path_b %d\n", pull_count);
-            // if (!merkle_verify(root_verify, global_query_indices.c_indices[s], auth_path_c, proof_len_c, cc[s], r+1)) {
+            // if (!merkle_verify(root_verify, global_query_indices.c_indices[s], auth_path_c, proof_len_c, cc[s], r+1, r)) {
             //     printf("merkle authentication path verification fails for cc\n");
             //     free(aa);
             //     free(bb);
