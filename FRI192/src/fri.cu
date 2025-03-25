@@ -412,30 +412,43 @@ int fri_log_domain_length(Fri* fri) {
     return (int)log2(fri->initial_domain_length);
 }
 //below function reads precomputed inverses from the file and puts it in the array that the function call is assigned to  
-void load_precomputed_inverses(const char *filename, uint64_t inverses[MAX_FRI_PARAMETERS]) {
+uint64_t precomputed_inverses[MAX_FRI_PARAMETERS] = {0};
+static bool inverses_loaded = false;
+void load_precomputed_inverses(const char *filename) {
+    if (inverses_loaded) return; // Skip if already loaded
+    
     FILE *file = fopen(filename, "r");
     if (!file) {
-        fprintf(stderr, "Error opening file: %s\n", filename);
+        fprintf(stderr, "Failed to open file: %s\n", filename);
         exit(EXIT_FAILURE);
     }
 
-    char buffer[1024];  
-    for (int i = 0; i < MAX_FRI_PARAMETERS; i++) {
-        while (fgets(buffer, sizeof(buffer), file)) {
-            if (strstr(buffer, "FRI Domain") != NULL) {
-                break;  //We found the correct domain, so exit this loop
+    char line[256];
+    int domain;
+
+    while (fgets(line, sizeof(line), file)) {
+        if (sscanf(line, "FRI Domain %d Inverses:", &domain) == 1) {
+            if (domain < 0 || domain >= MAX_FRI_PARAMETERS) {
+                fprintf(stderr, "Invalid domain: %d\n", domain);
+                exit(EXIT_FAILURE);
             }
-        }
-        if (fscanf(file, "%016lx", &inverses[i]) != 1) {
-            fprintf(stderr, "Error reading inverse for FRI Domain %d\n", i);
-            fclose(file);
-            exit(EXIT_FAILURE);
+
+            // Read only the first inverse in each domain
+            if (fgets(line, sizeof(line), file)) {
+                uint64_t value;
+                if (sscanf(line, "%lx", &value) == 1) {
+                    precomputed_inverses[domain] = value;
+                } else {
+                    fprintf(stderr, "Failed to parse inverse for domain %d\n", domain);
+                    exit(EXIT_FAILURE);
+                }
+            }
         }
     }
 
     fclose(file);
+    inverses_loaded = true;
 }
-
 //prints the whole codeword- for debugging 
 __host__ __device__ void print_codeword(uint64_t **codeword, size_t length, const size_t field_words) {
     for (size_t i = 0; i < length; i++) {
@@ -481,8 +494,8 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
     const int max_fri_domains = sizeof(preon.fri_domains) / sizeof(preon.fri_domains[0]); //should be 16 for 256-bit params 
     int basis_len = fri_log_domain_length(fri); //basis length of initial codeword  
     uint64_t ***codewords = (uint64_t ***)malloc((fri_num_rounds(fri) + 1 /* 12 + 1 */) * sizeof(uint64_t **)); //because we want 12 codewords.
-    uint64_t precomputed_inverses[max_fri_domains];
-    load_precomputed_inverses("fri_inverses_256.txt", precomputed_inverses);
+    // uint64_t precomputed_inverses[max_fri_domains] = {0};
+    // load_precomputed_inverses("fri_inverses_256.txt", precomputed_inverses);
     
     uint64_t var1[FIELD_WORDS] = {0x2}; // Represents var1 for generating elements in the field 
     uint64_t var2[FIELD_WORDS] = {0x3}; // Represents var2 for generating elements in the field 
@@ -544,6 +557,11 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
         uint64_t denominator_inv = 0;
         denominator_inv = precomputed_inverses[exponent + r]; 
         printf("denominator inverse %016lx\n", denominator_inv);
+        if (exponent + r < 0 || exponent + r >= max_fri_domains) {
+            fprintf(stderr, "Error: Index out of bounds (exponent + r = %d, max_fri_domains = %d)\n", 
+                    exponent + r, max_fri_domains);
+            exit(EXIT_FAILURE);
+        }        
         uint64_t **codeword_nxt = (uint64_t **)malloc((N/2)*sizeof(uint64_t *)); 
         uint64_t **tree_layer_nxt = (uint64_t **)malloc(N/2 *sizeof(uint64_t *));
         for (int i = 0; i < N/2; i++){
@@ -744,7 +762,7 @@ size_t* prove(Fri* fri, uint64_t **codeword, uint64_t **tree_layer) {
 
     size_t codeword_length = 0;
     while (codeword[codeword_length] != NULL) codeword_length++;
-
+    load_precomputed_inverses("fri_inverses_256.txt");
     global_proof_stream = create_proof_stream();
     uint64_t ***codewords = commit_host(fri, codeword, codeword_length, tree_layer);
 
@@ -892,7 +910,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
     } 
     for (r = 0; r < fri_num_rounds(fri) - 1; r++) {
         const int max_fri_domains = sizeof(preon.fri_domains) / sizeof(preon.fri_domains[0]);
-        int basis_len = fri_log_domain_length(fri) >> (r); 
+        int basis_len = fri_log_domain_length(fri) - (r); 
         eval_basis = populate_eval_basis(basis_len);
         offset = get_offset_for_basis(basis_len);
         assert(eval_basis != NULL && "eval_basis are not correct!");
@@ -926,11 +944,11 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
         uint64_t **by = (uint64_t **)malloc(fri->num_colinearity_tests * sizeof(uint64_t *));
         uint64_t **cy = (uint64_t **)malloc(fri->num_colinearity_tests * sizeof(uint64_t *));
 
-        uint64_t precomputed_inverses[max_fri_domains]; //should i make this a public variable?
-        load_precomputed_inverses("fri_inverses_256.txt", precomputed_inverses);
+        // uint64_t precomputed_inverses[max_fri_domains] = {0}; //should i make this a public variable?
+        // load_precomputed_inverses("fri_inverses_256.txt", precomputed_inverses);
         int exponent = preon.fri_domains[0].basis_len - fri_log_domain_length(fri); 
         uint64_t denominator_inv[field_words] = {0};
-    
+        
         denominator_inv[0] = precomputed_inverses[exponent + r]; 
         printf("denominator inverse %016lx\n", denominator_inv[0]);
         denominator_inv[1] = {0};
@@ -987,14 +1005,14 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
             uint64_t temp3[field_words] = {0};
             uint64_t temp4[field_words] = {0};
             uint64_t temp5[field_words] = {0};
-
-            i_th_ele_in_span(ax_temp, eval_basis, basis_len - r, global_query_indices.a_indices[s]);
+            printf("basis len %d\n", basis_len);
+            i_th_ele_in_span(ax_temp, eval_basis, basis_len, global_query_indices.a_indices[s]);
             field_add(ax, ax_temp, &offset, field_words);
             print_field("ax", ax, field_words);
             ax[1] = {0};
             ax[2] = {0};
             ax[3] = {0};
-            i_th_ele_in_span(bx_temp, eval_basis, basis_len - r, global_query_indices.b_indices[s]);
+            i_th_ele_in_span(bx_temp, eval_basis, basis_len, global_query_indices.b_indices[s]);
             field_add(bx, &offset, bx_temp, field_words);
             print_field("bx", bx, field_words);
             bx[1] = {0};
@@ -1142,7 +1160,7 @@ int verify(Fri *fri, uint64_t **polynomial_values, int degree) {
         free(aa);
         free(bb);
         free(cc);
-        free(precomputed_inverses);
+        //free(precomputed_inverses);
 
     }
 

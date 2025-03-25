@@ -282,14 +282,14 @@ void commit_launch(
     int basis_len = (int)log2(N);
     printf("basis len: %d\n", basis_len);
     printf("last round: %d\n", last_round);
-    // if (N == 131072) {
-    //     initialize_file("temp1.txt");
-    //     initialize_file("temp2.txt");
-    //     initialize_file("temp3.txt");
-    //     initialize_file("temp4.txt");
-    //     initialize_file("temp5.txt");
-    //     initialize_file("alpha_offset.txt");
-    // }
+    if (N == 131072) {
+        initialize_file("temp1.txt");
+        initialize_file("temp2.txt");
+        initialize_file("temp3.txt");
+        initialize_file("temp4.txt");
+        initialize_file("temp5.txt");
+        initialize_file("alpha_offset.txt");
+    }
 
     uint64_t *flattened_codeword = (uint64_t *)malloc(N * FIELD_WORDS * sizeof(uint64_t));
     if (flattened_codeword == NULL) {
@@ -492,6 +492,13 @@ void commit_launch(
     cudaMemcpy(flattened_alpha_offset, device_alpha_offset, N/2 * FIELD_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
     cudaMemcpy(flattened_tree_layer_nxt, device_tree_layer_nxt, (N / 2) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
 
+    write_to_file("temp1.txt", flattened_temp1, FIELD_WORDS, N/2);
+    write_to_file("temp2.txt", flattened_temp2, FIELD_WORDS, N/2);
+    write_to_file("temp3.txt", flattened_temp3, FIELD_WORDS, N/2);
+    write_to_file("temp4.txt", flattened_temp4, FIELD_WORDS, N/2);
+    write_to_file("temp5.txt", flattened_temp5, FIELD_WORDS, N/2);
+    write_to_file("alpha_offset.txt", flattened_alpha_offset, FIELD_WORDS, N/2);
+    
     for (int i = 0; i < N / 2; ++i) {
         for (int j = 0; j < FIELD_WORDS; ++j) {
             int index = i * FIELD_WORDS + j;

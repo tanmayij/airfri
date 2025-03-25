@@ -68,7 +68,7 @@ void field_sample(uint8_t *byte_array, size_t byte_array_len, uint64_t *eval_bas
 void int_to_bytes(int n, unsigned char *bytes, size_t size);
 void sample_indices(uint8_t* seed, size_t seed_len, int size, int reduced_size, int number, size_t* indices, size_t* reduced_indices);
 int fri_log_domain_length(Fri* fri);
-void load_precomputed_inverses(const char *filename, uint64_t inverses[MAX_FRI_PARAMETERS]);
+void load_precomputed_inverses(const char *filename);
 __host__ __device__ void print_codeword(uint64_t **codeword, size_t length, const size_t field_words);
 
 void calculate_indices(uint64_t *c_indices, uint64_t *a_indices, uint64_t *b_indices, int num_colinearity_tests);
