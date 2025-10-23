@@ -477,7 +477,7 @@ void initialize_indices_tracker(Fri* fri) {
     global_indices_tracker.round_indices = (size_t **)malloc(num_rounds * sizeof(size_t *));
     for (int i = 0; i < num_rounds; i++) {
         global_indices_tracker.round_indices[i] = (size_t *)malloc(global_indices_tracker.num_tests * sizeof(size_t));
-    }
+    } 
 }
 
 void cleanup_indices_tracker() {

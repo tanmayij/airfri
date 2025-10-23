@@ -1,0 +1,99 @@
+cmake_minimum_required(VERSION 3.10)
+project(airfri192
+    DESCRIPTION "FRI implementation for 192-bit security with CUDA"
+    LANGUAGES CXX CUDA)
+
+# Enable C++14 or higher
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CUDA_STANDARD 14)
+set(CMAKE_CUDA_STANDARD_REQUIRED True)
+
+# Set build type
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Add optimization flags based on the build type
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
+  set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -DNDEBUG")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+  set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0")
+endif()
+
+# Find CUDA
+find_package(CUDA REQUIRED)
+include_directories(${CUDA_INCLUDE_DIRS})
+
+# Find libsodium (for hashing)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBSODIUM REQUIRED libsodium)
+
+# Disable tests and benchmarks for dependencies
+set(WITH_PROCPS OFF CACHE BOOL "" FORCE)
+set(IS_LIBFF_PARENT OFF CACHE BOOL "" FORCE)
+set(LIBIOP_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+set(LIBIOP_ENABLE_PROFILING OFF CACHE BOOL "" FORCE)
+set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+
+# Add libff subdirectory (only once)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/libff/CMakeLists.txt")
+    set(LIBFF_BUILD_TYPE Release CACHE STRING "" FORCE)
+    add_subdirectory(external/libff EXCLUDE_FROM_ALL)
+else()
+    message(FATAL_ERROR "libff not found in external/. You need to add it as a submodule.")
+endif()
+
+# Add libiop subdirectory (only once) - skip its internal libff
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/libiop/CMakeLists.txt")
+    # Prevent libiop from adding its own libff copy
+    set(LIBFF_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/external/libff)
+    add_subdirectory(external/libiop EXCLUDE_FROM_ALL)
+else()
+    message(FATAL_ERROR "libiop not found in external/. You need to add it as a submodule.")
+endif()
+
+# Add Google Benchmark subdirectory (only once)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/benchmark/CMakeLists.txt")
+    add_subdirectory(external/benchmark EXCLUDE_FROM_ALL)
+else()
+    message(WARNING "Google Benchmark not found in external/.")
+endif()
+
+# Include directories
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/libiop
+    ${CMAKE_CURRENT_SOURCE_DIR}/../additive-fft/C++  # For cantor basis
+    ${LIBSODIUM_INCLUDE_DIRS}
+)
+
+# Collect source files
+file(GLOB CUDA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cu")
+file(GLOB CPP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+
+# Create FRI library
+add_library(fri_lib STATIC ${CUDA_SOURCES} ${CPP_SOURCES})
+
+target_include_directories(fri_lib
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../additive-fft/C++
+    ${LIBSODIUM_INCLUDE_DIRS}
+)
+
+target_link_libraries(fri_lib
+    PUBLIC
+    ${CUDA_LIBRARIES}
+    ${LIBSODIUM_LIBRARIES}
+    ff
+)
+
+# Add benchmarks subdirectory
+add_subdirectory(benchmarks)
+
+# Add tests subdirectory  
+add_subdirectory(tests)
