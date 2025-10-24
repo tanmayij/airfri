@@ -1,5 +1,5 @@
-#include "sample_indices.hpp"
-#include "hash.hpp"
+#include "sample_indices.cuh"
+#include "hash_host.cuh"
 #include <iostream>
 #include <cstring>
 #include <algorithm>

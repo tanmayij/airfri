@@ -13,7 +13,7 @@ include_directories(
 )
 
 # Create executable
-add_executable(test_airfri test_fri.cpp)
+add_executable(test_airfri test_fri.cu)
 
 # Link libraries
 target_link_libraries(test_airfri

@@ -10,29 +10,13 @@
 
 // convert libff::gf256 to uint64_t[4] (little-endian: word 0 = bits 0-63, word 3 = bits 192-255)
 inline void field_to_uint64(const libff::gf256 &elem, uint64_t out[4]) {
-    libff::bit_vector bits = libff::convert_field_element_to_bit_vector(elem);
-    
-    for (int w = 0; w < 4; w++) {
-        out[w] = 0;
-        for (int b = 0; b < 64; b++) {
-            if (bits[w * 64 + b]) {
-                out[w] |= (1ULL << b);
-            }
-        }
-    }
+    std::vector<uint64_t> words = elem.to_words();
+    for (int i = 0; i < 4; ++i) out[i] = words[i];
 }
 
 // convert uint64_t[4] to libff::gf256 (little-endian)
 inline libff::gf256 uint64_to_field(const uint64_t in[4]) {
-    libff::bit_vector bits(256);
-    
-    for (int w = 0; w < 4; w++) {
-        for (int b = 0; b < 64; b++) {
-            bits[w * 64 + b] = (in[w] >> b) & 1;
-        }
-    }
-    
-    return libff::convert_bit_vector_to_field_element<libff::gf256>(bits);
+    return libff::gf256(in[0], in[1], in[2], in[3]);
 }
 
 // batch conversion for vectors

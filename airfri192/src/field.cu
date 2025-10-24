@@ -1,11 +1,11 @@
 #include "../include/field.cuh"
-#include "../include/params.cuh"
-#include <stddef.h>
+// #include "../include/params.cuh"
+#include <cstddef>
 #include <cuda_runtime.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
 
 // Function declarations
 __host__ __device__ int is_zero(const uint64_t *a, size_t field_words);
@@ -26,14 +26,7 @@ __host__ __device__ void field_one(uint64_t *one,size_t field_words);
 
 __constant__ uint64_t zeros[5] = {0, 0, 0, 0, 0};
 __constant__ uint64_t one[5] = {0, 0, 0, 0, 1};
-__host__ __device__ int device_memcmp(const uint64_t *a, const uint64_t *b, size_t num_elements) {
-    for (size_t i = 0; i < num_elements; ++i) {
-        if (a[i] != b[i]) {
-            return (a[i] < b[i]) ? -1 : 1;  // Mimic the behavior of memcmp
-        }
-    }
-    return 0;
-}
+// device_memcmp is now defined inline in field.cuh
 // Function definitions
 __host__ __device__
 int is_zero(const uint64_t *a,size_t field_words)
@@ -244,31 +237,13 @@ void field_batch_inverse_and_mul_with_precomputed(uint64_t *result, const uint64
     memcpy(&result[0], c_inv, field_words * sizeof(uint64_t));
 }
 
-__host__ __device__ 
-void field_add(uint64_t *sum, const uint64_t *a, const uint64_t *b,size_t field_words)
-{
-    for (size_t i = 0; i < field_words; i++)
-        sum[i] = a[i] ^ b[i];
-}
+// field_add is now defined inline in field.cuh
 
-__host__ __device__ 
-void field_addEqual(uint64_t *a, const uint64_t *b, size_t field_words)
-{
-    for (size_t i = 0; i < field_words; i++)
-        a[i] ^= b[i];
-}
+// field_addEqual is now defined inline in field.cuh
 
-__host__ __device__ 
-void field_sub(uint64_t *difference, const uint64_t *a, const uint64_t *b,size_t field_words)
-{
-    field_add(difference, a, b, field_words);
-}
+// field_sub is now defined inline in field.cuh
 
-__host__ __device__ 
-void field_subEqual(uint64_t *a, const uint64_t *b,size_t field_words)
-{
-    field_addEqual(a, b, field_words);
-}
+// field_subEqual is now defined inline in field.cuh
 
 __host__ __device__ 
 static uint64_t gf64_mul(uint64_t a, uint64_t b)
@@ -280,110 +255,15 @@ static uint64_t gf64_mul(uint64_t a, uint64_t b)
     {
         int ar = ((a >> 63) & 1) * 0x1b;
         a = (a << 1) ^ ar;
-        b >>= 1;
+        b >>= 1; 
         result ^= a & (-(b & 1));
     }
     return result;
 }
 
-__host__ __device__ 
-void field_mul(uint64_t *product, const uint64_t *a, const uint64_t *b,size_t field_words)
-{
-    if (field_words == 3)
-    {
-        product[2] = gf64_mul(a[1], b[0]);
-        product[1] = gf64_mul(a[0], b[1]);
-        product[2] ^= product[1];
-        product[1] = product[2];
-        product[0] = gf64_mul(a[0], b[0]);
-        product[1] ^= product[0];
+// field_mul is now defined inline in field.cuh
 
-        product[2] ^= gf64_mul(a[2], b[2]);
-        product[1] ^= gf64_mul(a[2], b[1]);
-        product[1] ^= gf64_mul(a[1], b[2]);
-        product[0] ^= gf64_mul(a[2], b[0]);
-        product[0] ^= gf64_mul(a[1], b[1]);
-        product[0] ^= gf64_mul(a[0], b[2]);
-    }
-    else if (field_words == 4)
-    {
-        product[0] = gf64_mul(a[0], b[0]);
-        product[1] = gf64_mul(a[0], b[1]);
-        product[1] ^= gf64_mul(a[1], b[0]);
-        product[2] = gf64_mul(a[0], b[2]);
-        product[2] ^= gf64_mul(a[1], b[1]);
-        product[2] ^= gf64_mul(a[2], b[0]);
-        product[3] = product[2];
-        product[2] ^= product[1];
-        product[1] ^= product[0];
-
-        product[3] ^= gf64_mul(a[3], b[3]);
-        product[2] ^= gf64_mul(a[3], b[2]);
-        product[2] ^= gf64_mul(a[2], b[3]);
-        product[1] ^= gf64_mul(a[3], b[1]);
-        product[1] ^= gf64_mul(a[2], b[2]);
-        product[1] ^= gf64_mul(a[1], b[3]);
-        product[0] ^= gf64_mul(a[3], b[0]);
-        product[0] ^= gf64_mul(a[2], b[1]);
-        product[0] ^= gf64_mul(a[1], b[2]);
-        product[0] ^= gf64_mul(a[0], b[3]);
-    }
-    else if (field_words == 5)
-    {
-        product[4] = gf64_mul(a[0], b[3]);
-        product[4] ^= gf64_mul(a[1], b[2]);
-        product[4] ^= gf64_mul(a[2], b[1]);
-        product[4] ^= gf64_mul(a[3], b[0]);
-        product[3] = gf64_mul(a[0], b[2]);
-        product[3] ^= gf64_mul(a[1], b[1]);
-        product[3] ^= gf64_mul(a[2], b[0]);
-        product[2] = gf64_mul(a[0], b[1]);
-        product[2] ^= gf64_mul(a[1], b[0]);
-        product[1] = gf64_mul(a[0], b[0]);
-        product[0] = product[2];
-        product[2] ^= product[4];
-        product[4] ^= product[1];
-        product[2] ^= product[1];
-        product[1] ^= product[3];
-
-        product[4] ^= gf64_mul(a[4], b[4]);
-        product[3] ^= gf64_mul(a[3], b[4]);
-        product[3] ^= gf64_mul(a[4], b[3]);
-        product[2] ^= gf64_mul(a[2], b[4]);
-        product[2] ^= gf64_mul(a[3], b[3]);
-        product[2] ^= gf64_mul(a[4], b[2]);
-        product[1] ^= gf64_mul(a[1], b[4]);
-        product[1] ^= gf64_mul(a[2], b[3]);
-        product[1] ^= gf64_mul(a[3], b[2]);
-        product[1] ^= gf64_mul(a[4], b[1]);
-        product[0] ^= gf64_mul(a[0], b[4]);
-        product[0] ^= gf64_mul(a[1], b[3]);
-        product[0] ^= gf64_mul(a[2], b[2]);
-        product[0] ^= gf64_mul(a[3], b[1]);
-        product[0] ^= gf64_mul(a[4], b[0]);
-    }
-}
-
-__host__ __device__ 
-void field_mulEqual(uint64_t *a, const uint64_t *b,size_t field_words)
-{
-    uint64_t *temp;
-    uint64_t temp_stack[5];
-    if (field_words <= 5)
-    {
-        temp = (uint64_t *)&temp_stack;
-    }
-    else
-    {
-        temp = (uint64_t *)malloc(field_words * sizeof(uint64_t));
-    }
-    field_mul(temp, a, b, field_words);
-    memcpy(a, temp, field_words * sizeof(uint64_t));
-    if (field_words > 5)
-    {
-        free(temp);
-    }
-}
+// field_mulEqual is now defined inline in field.cuh
 
 __host__ __device__ 
 void field_swap_with_tmp(uint64_t *a, uint64_t *b, uint64_t *tmp, const size_t field_bytesize)
@@ -401,12 +281,7 @@ void field_swap(uint64_t *a, uint64_t *b, const size_t field_bytesize)
     free(tmp);
 }
 
-__host__ __device__ 
-void field_one(uint64_t *one,size_t field_words)
-{
-    memset(one, 0, (field_words - 1) * sizeof(uint64_t));
-    one[field_words - 1] = 1;
-}
+// field_one is now defined inline in field.cuh
 
 __host__ __device__ 
 void field_neg(uint64_t *result, const uint64_t *a,size_t field_words)
