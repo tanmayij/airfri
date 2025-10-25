@@ -8,14 +8,62 @@
 //#include "../include/hash_host.cuh"
 #include "../include/commit_kernel.cuh"
 #include "../include/field.cuh"
+//#include "../additive-fft/C++/Cantor/cantor_basis.hpp"
 extern int field_words;
 #include "../include/fri_utils.cuh"
+namespace cantor {
+    constexpr uint64_t cantor_in_gf2to256[32][4] = {
+{ 1ULL, 0ULL, 0ULL, 0ULL }, 
+{ 4295033141ULL, 1ULL, 1ULL, 0ULL }, 
+{ 13615767094782902071ULL, 16509767166769775667ULL, 17355192366725112762ULL, 17376248881838693815ULL }, 
+{ 4644524726043978731ULL, 15693424397002034251ULL, 15710347196241526592ULL, 10880548238252614091ULL }, 
+{ 640118059613985261ULL, 1313903195796726235ULL, 3396766875825798676ULL, 14192144114219446720ULL }, 
+{ 10077849366122156232ULL, 7086092472166378657ULL, 15100903294859545647ULL, 3987845167958163125ULL }, 
+{ 16270511978075044806ULL, 16164563811376147135ULL, 2625578537547985342ULL, 6072447074683886330ULL }, 
+{ 5630018274122687930ULL, 8996055410665817774ULL, 3069990775405148075ULL, 12687162812642014724ULL }, 
+{ 5754938134996921238ULL, 8937587289433511601ULL, 156331452736549519ULL, 10952228242332826081ULL }, 
+{ 14899878026048491996ULL, 11881287613761720319ULL, 3157557464693671546ULL, 8490414338663093587ULL }, 
+{ 6144948151697131770ULL, 12829366715966933238ULL, 5161617361959799949ULL, 16577793721757437839ULL }, 
+{ 17335731826601981145ULL, 10374971554879084408ULL, 6560426406833767547ULL, 15376035997087156491ULL }, 
+{ 18156021140703472090ULL, 4583267173085506923ULL, 8143265948793651304ULL, 13846076204877184192ULL }, 
+{ 12368643584047939295ULL, 11819919576370109150ULL, 17178066221154598626ULL, 3537106026951133662ULL }, 
+{ 17860052627717163084ULL, 1023859705452441292ULL, 4445661619295054034ULL, 16613301729520929541ULL }, 
+{ 12567644037189678575ULL, 10989995650777694894ULL, 16650321402958599001ULL, 15394086554448135710ULL }, 
+{ 3895293214564875702ULL, 6229113196406670081ULL, 3409072240043564264ULL, 9340437959674295503ULL }, 
+{ 6003731047390282906ULL, 9123062914094717993ULL, 1995146645112670937ULL, 9677318193463286565ULL }, 
+{ 11863262441345585988ULL, 16424244390609524150ULL, 12179255713357253792ULL, 8443460857916446437ULL }, 
+{ 952441961121987866ULL, 17558130836699076420ULL, 13849621668659962270ULL, 5858758139358259385ULL }, 
+{ 4842952427975513570ULL, 5536087762530766659ULL, 9066314258170351741ULL, 12689759026623861971ULL }, 
+{ 11934042102125943131ULL, 5684306568414579395ULL, 388029345282030729ULL, 10845248503285669883ULL }, 
+{ 3177192301120302685ULL, 15102579401182205913ULL, 12475081644470835988ULL, 14078415256170588310ULL }, 
+{ 17763443710946410651ULL, 14346436287575459071ULL, 14335403489212834782ULL, 14214157082939204186ULL }, 
+{ 5080490340599271256ULL, 12689939537085429179ULL, 1467244048409411438ULL, 14393358436686695531ULL }, 
+{ 2614694687946290618ULL, 386260273944309489ULL, 3493066445529797887ULL, 14058644840294299294ULL }, 
+{ 14488596929048962438ULL, 13785333696019006426ULL, 18177809138659256097ULL, 9536437080691907638ULL }, 
+{ 9522776976361151227ULL, 12648439438049231636ULL, 9389018560787912221ULL, 9245451799559131985ULL }, 
+{ 17882361982162706348ULL, 568081022572744249ULL, 13390524583313730048ULL, 14385592888705335992ULL }, 
+{ 4104017265333605612ULL, 15082008458465896366ULL, 16686233106678210090ULL, 3681558827891653969ULL }, 
+{ 7929606058812646144ULL, 3003101923230410791ULL, 13498978919646001267ULL, 11922546952913825908ULL }, 
+{ 18231145936351310928ULL, 11618316067220172972ULL, 7652517275783664224ULL, 2804331428984460444ULL }, 
+};
+}
 
 #define HASH_WORDS 4
 #define FIELD_WORDS 4
 #define CONCAT_WORDS (FIELD_WORDS + HASH_WORDS)
 
 //void SHA3_host(uint8_t *hm, const uint8_t *msg, size_t msg_len, size_t bitSize);
+
+inline void cantor_Lk(uint64_t* out, const uint64_t basis[][4], int basis_len, size_t idx) {
+    for(int w = 0; w < 4; w++) out[w] = 0;
+    for(int b = 0; b < basis_len; b++) {
+        if((idx >> b) & 1) {
+            for(int w = 0; w < 4; w++) {
+                out[w] ^= basis[b][w];
+            }
+        }
+    }
+}
 
 __device__ void print_field_kernel(const char *label, const uint64_t *field, int field_words) {
     printf("%s: ", label);
@@ -66,6 +114,7 @@ __global__ void commit_kernel(
     uint64_t *device_temp1, uint64_t *device_temp2,
     uint64_t *device_temp3, uint64_t *device_temp4,
     uint64_t *device_temp5,
+    uint64_t *device_alpha_offset, 
     int N
 ) {
     size_t I = blockIdx.x * blockDim.x + threadIdx.x;
@@ -81,8 +130,7 @@ __global__ void commit_kernel(
     // temp1 = codeword[2j] - codeword[2j+1]
     field_sub(&device_temp1[idx3], &device_codeword[idx1], &device_codeword[idx2], FIELD_WORDS);
     // temp2 = alpha - x_even (L_k[2i])
-    // NOTE: You must provide L_k[2i] (the evaluation point) as an input or compute it here. For now, assume device_temp4[idx3] holds L_k[2i].
-    field_sub(&device_temp2[idx3], device_alpha, &device_temp4[idx3], FIELD_WORDS);
+    field_sub(&device_temp2[idx3], device_alpha,  &device_alpha_offset[idx3], FIELD_WORDS);
     // temp3 = temp1 * temp2
     field_mul(&device_temp3[idx3], &device_temp1[idx3], &device_temp2[idx3], FIELD_WORDS);
     // temp4 = codeword[2j] + temp3
@@ -113,14 +161,14 @@ __global__ void compute_tree_layers(
         int idx4 = I * (FIELD_WORDS + HASH_WORDS);
 
         for (int j = 0; j < FIELD_WORDS; j++) {
-            device_combined_sibling_codewords[idx3 + j] = device_tree_layer[idx1 + j];
-            device_combined_sibling_codewords[idx3 + FIELD_WORDS + j] = device_tree_layer[idx2 + j];
+            device_combined_sibling_codewords[idx1 + j] = device_tree_layer[idx1 + j];
+            device_combined_sibling_codewords[idx1 + FIELD_WORDS + j] = device_tree_layer[idx2 + j];
         }
 
         SHA3((uint8_t *)&device_digest[idx5], (uint8_t *)&device_combined_sibling_codewords[idx3], 2 * FIELD_WORDS * sizeof(uint64_t), 256);
 
         for (int j = 0; j < FIELD_WORDS; j++) {
-            device_concat_codeword_to_hash[idx4 + j] = device_codeword_nxt[idx3 / 2 + j]; //fix
+            device_concat_codeword_to_hash[idx4 + j] = device_codeword_nxt[idx1 / 2 + j]; //fix
         }
         for (int j = 0; j < HASH_WORDS; j++) {
             device_concat_codeword_to_hash[idx4 + FIELD_WORDS + j] = device_digest[idx5 + j];
@@ -132,7 +180,7 @@ __global__ void compute_tree_layers(
 
     if (I < N / 2 && N < 1048576 && N >= 64) {
         int idx1 = 2 * I * (FIELD_WORDS + HASH_WORDS);
-        int idx2 = (2 * I + 1) * (FIELD_WORDS + HASH_WORDS);
+        int idx2 = ((2 * I) + 1) * (FIELD_WORDS + HASH_WORDS);
         int idx3 = I * FIELD_WORDS;
         int idx5 = I * HASH_WORDS;
         int idx4 = I * (FIELD_WORDS + HASH_WORDS);
@@ -147,7 +195,7 @@ __global__ void compute_tree_layers(
 
     
         for (int j = 0; j < FIELD_WORDS; j++) {
-            device_concat_codeword_to_hash[idx4 + j] = device_codeword_nxt[idx3 / 2 + j];  //fix
+            device_concat_codeword_to_hash[idx4 + j] = device_codeword_nxt[idx3 + j];  //fixed??
         }
         for (int j = 0; j < HASH_WORDS; j++) {
             device_concat_codeword_to_hash[idx4 + FIELD_WORDS + j] = device_digest[idx5 + j];
@@ -292,7 +340,6 @@ void commit_launch(
         initialize_file("temp3.txt");
         initialize_file("temp4.txt");
         initialize_file("temp5.txt");
-        initialize_file("alpha_offset.txt");
     }
 
     uint64_t *flattened_codeword = (uint64_t *)malloc(N * FIELD_WORDS * sizeof(uint64_t));
@@ -400,13 +447,20 @@ void commit_launch(
     uint64_t *device_codeword, *device_codeword_nxt, *device_alpha;
     uint64_t *device_temp1, *device_temp2, *device_temp3, *device_temp4, *device_temp5;
     uint64_t *device_layer_hashes, *device_merkle_root, *device_tree_layer, *device_tree_layer_nxt, *device_combined_sibling_codewords, *device_combined_sibling_hashes, *device_concat_codeword_to_hash, *device_digest;
-    uint64_t *flattened_alpha_offset = (uint64_t *)malloc(N/2 * FIELD_WORDS * sizeof(uint64_t));
+    //uint64_t *flattened_alpha_offset = (uint64_t *)malloc(N/2 * FIELD_WORDS * sizeof(uint64_t));
     uint64_t *flattened_temp1 = (uint64_t *)malloc(N/2 * FIELD_WORDS * sizeof(uint64_t));
     uint64_t *flattened_temp2 = (uint64_t *)malloc(N/2 * FIELD_WORDS * sizeof(uint64_t));
     uint64_t *flattened_temp3 = (uint64_t *)malloc(N/2 * FIELD_WORDS * sizeof(uint64_t));
     uint64_t *flattened_temp4 = (uint64_t *)malloc(N/2 * FIELD_WORDS * sizeof(uint64_t));
     uint64_t *flattened_temp5 = (uint64_t *)malloc(N/2 * FIELD_WORDS * sizeof(uint64_t));
-
+    uint64_t* flattened_alpha_offset = (uint64_t*)malloc((N/2) * FIELD_WORDS * sizeof(uint64_t));
+    int cantor_basis_len = basis_len; // basis_len for this round
+    for(int i = 0; i < N/2; i++) {
+        cantor_Lk(&flattened_alpha_offset[i * FIELD_WORDS], cantor::cantor_in_gf2to256, cantor_basis_len, 2 * i);
+    }
+    uint64_t* device_alpha_offset;
+    cudaMalloc((void**)&device_alpha_offset, (N/2) * FIELD_WORDS * sizeof(uint64_t));
+    
     flattened_temp1[N/2 * FIELD_WORDS] = {0}, flattened_temp2[N/2 * FIELD_WORDS] = {0}, flattened_temp3[N/2 * FIELD_WORDS] = {0}, flattened_temp4[N/2 * FIELD_WORDS] = {0}, flattened_temp5[N/2 * FIELD_WORDS] = {0};
     flattened_alpha_offset[N/2 * FIELD_WORDS] = {0};
     cudaMalloc((void**)&device_codeword, field_size);
@@ -434,6 +488,7 @@ void commit_launch(
 
     cudaMemcpy(device_codeword, flattened_codeword, field_size, cudaMemcpyHostToDevice);
     cudaMemcpy(device_alpha, alpha, FIELD_WORDS * sizeof(uint64_t), cudaMemcpyHostToDevice);
+    cudaMemcpy(device_alpha_offset, flattened_alpha_offset, (N/2) * FIELD_WORDS * sizeof(uint64_t), cudaMemcpyHostToDevice);
     // cudaMemcpy(device_offset, offset, sizeof(uint64_t), cudaMemcpyHostToDevice);
     // cudaMemcpy(device_denominator_inv, &denominator_inv, sizeof(uint64_t), cudaMemcpyHostToDevice);
     // cudaMemcpy(device_eval_basis, flattened_eval_basis, basis_len * sizeof(uint64_t), cudaMemcpyHostToDevice);
@@ -447,7 +502,7 @@ void commit_launch(
     int num_blocks = (N / 2 + threads_per_block - 1) / threads_per_block;
     commit_kernel<<<num_blocks * 2, threads_per_block>>>(
         device_codeword, device_codeword_nxt, device_alpha,
-        device_temp1, device_temp2, device_temp3, device_temp4, device_temp5, N
+        device_temp1, device_temp2, device_temp3, device_temp4, device_temp5, device_alpha_offset, N
     );
     cudaDeviceSynchronize();
 
@@ -627,10 +682,10 @@ void commit_launch(
         }// close while
         //do not delete the below code - only comment it
         int number = 0;
-        for (int layer = 12; layer <= 16; layer++) {
-            int elements = 1 << (17 - layer);  // Number of elements in this layer
+        for (int layer = 14; layer <= 19; layer++) {
+            int elements = 1 << (20 - layer);  // Number of elements in this layer
             printf("\n=== DEBUG: tree[%d] Elements ===\n", layer);
-            if (layer == 12) { number = 8;}
+            if (layer == 14) { number = 8;}
             else { number = 4;}
             for (int i = 0; i < elements; i++) {
                 printf("Index %d: ", i);
@@ -640,19 +695,19 @@ void commit_launch(
                 printf("\n");
             }
         }
-        printf("\n=== DEBUG: tree[15] Elements (Last Layer Before Merkle Root) ===\n");
-        for (int i = 0; i < 4; i++) {  // Only two elements in the final layer
+        printf("\n=== DEBUG: tree[14] Elements ===\n");
+        for (int i = 0; i < 16; i++) {  // 16 elements in layer 14
             printf("Index %d: ", i);
-            for (int j = 0; j < HASH_WORDS; j++) {
-                printf("%016lx ", tree[15][i][j]);  // Print each hash
+            for (int j = 0; j < 8; j++) {
+                printf("%016lx ", tree[14][i][j]);  // Print each hash
             }
             printf("\n");
         }
-        printf("\n=== DEBUG: tree[16] Elements (Last Layer Before Merkle Root) ===\n");
-        for (int i = 0; i < 2; i++) {  // Only two elements in the final layer
+        printf("\n=== DEBUG: tree[18] Elements (Last Layer Before Merkle Root) ===\n");
+        for (int i = 0; i < 2; i++) {  // 2 elements in layer 18
             printf("Index %d: ", i);
-            for (int j = 0; j < HASH_WORDS; j++) {
-                printf("%016lx ", tree[16][i][j]);  // Print each hash
+            for (int j = 0; j < 4; j++) {
+                printf("%016lx ", tree[18][i][j]);  // Print each hash
             }
             printf("\n");
         }

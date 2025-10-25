@@ -9,9 +9,8 @@
 #include <libiop/algebra/utils.hpp>
 #include <libiop/algebra/fft.hpp>
 #include <thread>
-#include "../additive-fft/C++/Cantor/cantor_basis.hpp"
 #include "../additive-fft/C++/Cantor/fft.hpp"
-
+#include "../additive-fft/C++/Cantor/cantor_basis.hpp"
 #include "../include/poly_eval.cuh"
 #include "../include/prove.cuh"
 #include "../include/fri_utils.cuh"

@@ -109,7 +109,7 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
         push_object(global_proof_stream, (void*)codeword[i]);
         push_count++;
     }
-    cout << "  Pushed " << final_codeword_length << " last codeword elements" << endl;
+    // cout << "  Pushed " << final_codeword_length << " last codeword elements" << endl;
     
     cout << "Total push count in commit: " << push_count << endl;
     
