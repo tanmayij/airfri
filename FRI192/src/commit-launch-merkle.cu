@@ -543,8 +543,8 @@ void commit_launch(
         
         int tree_idx = last_round;  //start with layer 12 which holds 32 elements
         int next_N = N / 2; //initialize to 32 for the next layer size
-        
-        //first transfer the tree_layer_nxt elements to tree[12]
+
+        //first transfer the tree_layer_nxt elements to the next layer
         tree[tree_idx] = (uint64_t **)malloc((next_N) * sizeof(uint64_t *));
         for (int i = 0; i < next_N; i++) {
             tree[tree_idx][i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));
@@ -561,7 +561,7 @@ void commit_launch(
             printf("\n");
         }
         /*steps:
-        1. tree[12] is filled, flattened_tree_layer_nxt has 32 elements now
+        1. tree[15] is filled, flattened_tree_layer_nxt has 32 elements now
         2. allocate memory to device variables tree and tree_nxt (host to device)
         3.copy device_tree_layer = flattened_tree_layer_nxt
         4.realloc memory for flattened_tree_layer and flattened_tree_layer_nxt

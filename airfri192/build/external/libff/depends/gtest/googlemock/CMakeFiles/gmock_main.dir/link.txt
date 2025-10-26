@@ -1,0 +1,2 @@
+/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-ar qc libgmock_main.a CMakeFiles/gmock_main.dir/src/gmock_main.cc.o
+/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-ranlib libgmock_main.a

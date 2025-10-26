@@ -1,3 +1,15 @@
 [submodule "FRI192/FRI192/cantor-fft"]
 	path = FRI192/FRI192/cantor-fft
 	url = https://github.com/mtbadakhshan/additive-fft.git
+[submodule "airfri192/external/benchmark"]
+	path = airfri192/external/benchmark
+	url = https://github.com/google/benchmark.git
+[submodule "airfri192/external/libff"]
+	path = airfri192/external/libff
+	url = https://github.com/scipr-lab/libff.git
+[submodule "airfri192/external/libiop"]
+	path = airfri192/external/libiop
+	url = https://github.com/scipr-lab/libiop.git
+[submodule "airfri192/additive-fft"]
+	path = airfri192/additive-fft
+	url = https://github.com/mtbadakhshan/additive-fft.git

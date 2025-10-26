@@ -1,3 +1,18 @@
 {
-    "cmake.sourceDirectory": "/u1/tjandhya/thesis/cantor-fft/C++"
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/u1/tjandhya/zksig/airfri/airfri192/external/libff",
+                "/u1/tjandhya/zksig/airfri/airfri192/external/libiop"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
 }

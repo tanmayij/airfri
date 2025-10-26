@@ -1,0 +1,2 @@
+/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-ar qc libgmock.a "CMakeFiles/gmock.dir/src/gmock-all.cc.o"
+/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-ranlib libgmock.a

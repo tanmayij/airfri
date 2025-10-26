@@ -1,0 +1,416 @@
+[
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++  -I/u1/tjandhya/zksig/airfri/airfri192/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff -I/u1/tjandhya/zksig/airfri/airfri192/external/libiop -I/u1/tjandhya/zksig/airfri/airfri192/../additive-fft/C++ -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/iop.dir/external/libiop/libiop/algebra/utils.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/algebra/utils.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/algebra/utils.cpp",
+  "output": "CMakeFiles/iop.dir/external/libiop/libiop/algebra/utils.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++  -I/u1/tjandhya/zksig/airfri/airfri192/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff -I/u1/tjandhya/zksig/airfri/airfri192/external/libiop -I/u1/tjandhya/zksig/airfri/airfri192/../additive-fft/C++ -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/iop.dir/external/libiop/libiop/bcs/hashing/blake2b.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/bcs/hashing/blake2b.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/bcs/hashing/blake2b.cpp",
+  "output": "CMakeFiles/iop.dir/external/libiop/libiop/bcs/hashing/blake2b.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++  -I/u1/tjandhya/zksig/airfri/airfri192/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff -I/u1/tjandhya/zksig/airfri/airfri192/external/libiop -I/u1/tjandhya/zksig/airfri/airfri192/../additive-fft/C++ -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/iop.dir/external/libiop/libiop/common/common.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/common/common.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/common/common.cpp",
+  "output": "CMakeFiles/iop.dir/external/libiop/libiop/common/common.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++  -I/u1/tjandhya/zksig/airfri/airfri192/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff -I/u1/tjandhya/zksig/airfri/airfri192/external/libiop -I/u1/tjandhya/zksig/airfri/airfri192/../additive-fft/C++ -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/iop.dir/external/libiop/libiop/iop/utilities/batching.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/iop/utilities/batching.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/iop/utilities/batching.cpp",
+  "output": "CMakeFiles/iop.dir/external/libiop/libiop/iop/utilities/batching.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++  -I/u1/tjandhya/zksig/airfri/airfri192/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff -I/u1/tjandhya/zksig/airfri/airfri192/external/libiop -I/u1/tjandhya/zksig/airfri/airfri192/../additive-fft/C++ -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/iop.dir/external/libiop/libiop/protocols/ldt/fri/fri_aux.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/protocols/ldt/fri/fri_aux.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/protocols/ldt/fri/fri_aux.cpp",
+  "output": "CMakeFiles/iop.dir/external/libiop/libiop/protocols/ldt/fri/fri_aux.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++  -I/u1/tjandhya/zksig/airfri/airfri192/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff -I/u1/tjandhya/zksig/airfri/airfri192/external/libiop -I/u1/tjandhya/zksig/airfri/airfri192/../additive-fft/C++ -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/iop.dir/external/libiop/libiop/protocols/ldt/fri/fri_ldt.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/protocols/ldt/fri/fri_ldt.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/protocols/ldt/fri/fri_ldt.cpp",
+  "output": "CMakeFiles/iop.dir/external/libiop/libiop/protocols/ldt/fri/fri_ldt.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++  -I/u1/tjandhya/zksig/airfri/airfri192/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff -I/u1/tjandhya/zksig/airfri/airfri192/external/libiop -I/u1/tjandhya/zksig/airfri/airfri192/../additive-fft/C++ -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/iop.dir/external/libiop/libiop/protocols/ldt/ldt_reducer.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/protocols/ldt/ldt_reducer.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/protocols/ldt/ldt_reducer.cpp",
+  "output": "CMakeFiles/iop.dir/external/libiop/libiop/protocols/ldt/ldt_reducer.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++  -I/u1/tjandhya/zksig/airfri/airfri192/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff -I/u1/tjandhya/zksig/airfri/airfri192/external/libiop -I/u1/tjandhya/zksig/airfri/airfri192/../additive-fft/C++ -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/iop.dir/external/libiop/libiop/relations/sparse_matrix.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/relations/sparse_matrix.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libiop/libiop/relations/sparse_matrix.cpp",
+  "output": "CMakeFiles/iop.dir/external/libiop/libiop/relations/sparse_matrix.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/depends",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/ate-pairing/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/xbyak -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -o CMakeFiles/zm.dir/ate-pairing/src/zm.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/ate-pairing/src/zm.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/ate-pairing/src/zm.cpp",
+  "output": "external/libff/depends/CMakeFiles/zm.dir/ate-pairing/src/zm.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/depends",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/ate-pairing/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/xbyak -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -o CMakeFiles/zm.dir/ate-pairing/src/zm2.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/ate-pairing/src/zm2.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/ate-pairing/src/zm2.cpp",
+  "output": "external/libff/depends/CMakeFiles/zm.dir/ate-pairing/src/zm2.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/depends/gtest/googlemock",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googlemock/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googlemock -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest -isystem /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/include -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -Wall -Wshadow -Werror -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gmock.dir/src/gmock-all.cc.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googlemock/src/gmock-all.cc",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googlemock/src/gmock-all.cc",
+  "output": "external/libff/depends/gtest/googlemock/CMakeFiles/gmock.dir/src/gmock-all.cc.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/depends/gtest/googlemock",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googlemock -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest -isystem /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googlemock/include -isystem /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/include -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -Wall -Wshadow -Werror -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gmock_main.dir/src/gmock_main.cc.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googlemock/src/gmock_main.cc",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googlemock/src/gmock_main.cc",
+  "output": "external/libff/depends/gtest/googlemock/CMakeFiles/gmock_main.dir/src/gmock_main.cc.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/depends/gtest/googlemock/gtest",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -Wall -Wshadow -Werror -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/src/gtest-all.cc",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/src/gtest-all.cc",
+  "output": "external/libff/depends/gtest/googlemock/gtest/CMakeFiles/gtest.dir/src/gtest-all.cc.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/depends/gtest/googlemock/gtest",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest -isystem /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/include -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -Wall -Wshadow -Werror -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/src/gtest_main.cc",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/src/gtest_main.cc",
+  "output": "external/libff/depends/gtest/googlemock/gtest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_fields.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_fields.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_fields.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_fields.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_g1.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_g1.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_g1.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_g1.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_g2.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_g2.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_g2.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_g2.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_init.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_init.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_init.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_init.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_pairing.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_pairing.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_pairing.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_pairing.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_pp.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_pp.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bls12_381/bls12_381_pp.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bls12_381/bls12_381_pp.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_fields.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_fields.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_fields.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_fields.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_g1.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_g1.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_g1.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_g1.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_g2.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_g2.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_g2.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_g2.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_init.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_init.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_init.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_init.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_pairing.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_pairing.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_pairing.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_pairing.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_pp.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_pp.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/alt_bn128/alt_bn128_pp.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/alt_bn128/alt_bn128_pp.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/edwards/edwards_fields.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_fields.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_fields.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/edwards/edwards_fields.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/edwards/edwards_g1.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_g1.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_g1.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/edwards/edwards_g1.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/edwards/edwards_g2.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_g2.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_g2.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/edwards/edwards_g2.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/edwards/edwards_init.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_init.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_init.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/edwards/edwards_init.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/edwards/edwards_pairing.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_pairing.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_pairing.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/edwards/edwards_pairing.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/edwards/edwards_pp.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_pp.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/edwards/edwards_pp.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/edwards/edwards_pp.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_fields.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_fields.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_fields.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_fields.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_g1.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_g1.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_g1.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_g1.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_g2.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_g2.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_g2.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_g2.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_init.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_init.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_init.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_init.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_pairing.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_pairing.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_pairing.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_pairing.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_pp.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_pp.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt4/mnt4_pp.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt4/mnt4_pp.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt46_common.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt46_common.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt46_common.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt46_common.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_fields.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_fields.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_fields.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_fields.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_g1.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_g1.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_g1.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_g1.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_g2.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_g2.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_g2.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_g2.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_init.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_init.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_init.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_init.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_pairing.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_pairing.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_pairing.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_pairing.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_pp.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_pp.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/mnt/mnt6/mnt6_pp.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/mnt/mnt6/mnt6_pp.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/fields/binary/gf32.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/binary/gf32.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/binary/gf32.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/fields/binary/gf32.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/fields/binary/gf64.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/binary/gf64.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/binary/gf64.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/fields/binary/gf64.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/fields/binary/gf128.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/binary/gf128.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/binary/gf128.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/fields/binary/gf128.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/fields/binary/gf192.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/binary/gf192.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/binary/gf192.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/fields/binary/gf192.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/fields/binary/gf256.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/binary/gf256.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/binary/gf256.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/fields/binary/gf256.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/common/double.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/common/double.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/common/double.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/common/double.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/common/profiling.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/common/profiling.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/common/profiling.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/common/profiling.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/common/utils.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/common/utils.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/common/utils.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/common/utils.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bn128/bn128_fields.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_fields.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_fields.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bn128/bn128_fields.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bn128/bn128_g1.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_g1.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_g1.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bn128/bn128_g1.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bn128/bn128_g2.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_g2.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_g2.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bn128/bn128_g2.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bn128/bn128_gt.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_gt.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_gt.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bn128/bn128_gt.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bn128/bn128_init.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_init.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_init.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bn128/bn128_init.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bn128/bn128_pairing.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_pairing.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_pairing.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bn128/bn128_pairing.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/ff.dir/algebra/curves/bn128/bn128_pp.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_pp.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/bn128/bn128_pp.cpp",
+  "output": "external/libff/libff/CMakeFiles/ff.dir/algebra/curves/bn128/bn128_pp.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -isystem /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/include -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/algebra_bilinearity_test.dir/algebra/curves/tests/test_bilinearity.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/tests/test_bilinearity.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/tests/test_bilinearity.cpp",
+  "output": "external/libff/libff/CMakeFiles/algebra_bilinearity_test.dir/algebra/curves/tests/test_bilinearity.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -isystem /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/include -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/algebra_groups_test.dir/algebra/curves/tests/test_groups.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/tests/test_groups.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/curves/tests/test_groups.cpp",
+  "output": "external/libff/libff/CMakeFiles/algebra_groups_test.dir/algebra/curves/tests/test_groups.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -isystem /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/include -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/algebra_field_utils_test.dir/algebra/field_utils/tests/test_field_utils.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/field_utils/tests/test_field_utils.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/field_utils/tests/test_field_utils.cpp",
+  "output": "external/libff/libff/CMakeFiles/algebra_field_utils_test.dir/algebra/field_utils/tests/test_field_utils.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -isystem /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/include -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/algebra_all_fields_test.dir/algebra/fields/tests/test_all_fields.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/tests/test_all_fields.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/tests/test_all_fields.cpp",
+  "output": "external/libff/libff/CMakeFiles/algebra_all_fields_test.dir/algebra/fields/tests/test_all_fields.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -isystem /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/include -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/algebra_fpn_fields_test.dir/algebra/fields/tests/test_fpn_fields.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/tests/test_fpn_fields.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/tests/test_fpn_fields.cpp",
+  "output": "external/libff/libff/CMakeFiles/algebra_fpn_fields_test.dir/algebra/fields/tests/test_fpn_fields.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -isystem /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/include -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/algebra_binary_fields_test.dir/algebra/fields/tests/test_binary_fields.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/tests/test_binary_fields.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/fields/tests/test_binary_fields.cpp",
+  "output": "external/libff/libff/CMakeFiles/algebra_binary_fields_test.dir/algebra/fields/tests/test_binary_fields.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -isystem /u1/tjandhya/zksig/airfri/airfri192/external/libff/depends/gtest/googletest/include -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/common_test.dir/common/tests/test_common.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/common/tests/test_common.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/common/tests/test_common.cpp",
+  "output": "external/libff/libff/CMakeFiles/common_test.dir/common/tests/test_common.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/external/libff/libff",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++ -DBINARY_OUTPUT -DBN_SUPPORT_SNARK=1 -DCURVE_BN128 -DMONTGOMERY_OUTPUT -DNO_PROCPS -DUSE_ASM -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/depends -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -std=c++11 -Wall -Wextra -Wfatal-errors -mpclmul -msse4.1 -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/multiexp_profile.dir/algebra/scalar_multiplication/multiexp_profile.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/scalar_multiplication/multiexp_profile.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/algebra/scalar_multiplication/multiexp_profile.cpp",
+  "output": "external/libff/libff/CMakeFiles/multiexp_profile.dir/algebra/scalar_multiplication/multiexp_profile.cpp.o"
+},
+{
+  "directory": "/u1/tjandhya/zksig/airfri/airfri192/build/tests",
+  "command": "/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-c++  -I/u1/tjandhya/zksig/airfri/airfri192/include -I/u1/tjandhya/zksig/airfri/airfri192/external/libff -I/u1/tjandhya/zksig/airfri/airfri192/external/libiop -I/u1/tjandhya/zksig/airfri/airfri192/../additive-fft/C++ -I/u1/tjandhya/zksig/airfri/airfri192 -I/u1/tjandhya/zksig/airfri/airfri192/external/libff/libff/.. -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /u1/tjandhya/miniforge3/envs/sage/include -O3 -march=native -DNDEBUG -std=gnu++17 -I/u1/tjandhya/miniforge3/envs/sage/include -o CMakeFiles/test_airfri.dir/test_fri.cpp.o -c /u1/tjandhya/zksig/airfri/airfri192/tests/test_fri.cpp",
+  "file": "/u1/tjandhya/zksig/airfri/airfri192/tests/test_fri.cpp",
+  "output": "tests/CMakeFiles/test_airfri.dir/test_fri.cpp.o"
+}
+]

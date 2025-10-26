@@ -1,0 +1,2 @@
+/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-ar qc libzm.a "CMakeFiles/zm.dir/ate-pairing/src/zm.cpp.o" "CMakeFiles/zm.dir/ate-pairing/src/zm2.cpp.o"
+/u1/tjandhya/miniforge3/envs/sage/bin/x86_64-conda-linux-gnu-ranlib libzm.a
