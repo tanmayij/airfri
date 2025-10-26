@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "../include/hash-host.cuh"
+#include "../include/hash_host.cuh"
 #include <stdio.h>
 
 //size_t field_words = 4; //for 192

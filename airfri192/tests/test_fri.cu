@@ -14,6 +14,7 @@
 #include "../include/poly_eval.cuh"
 #include "../include/prove.cuh"
 #include "../include/fri_utils.cuh"
+#include "../include/verify.cuh"
 
 using namespace std;
 
@@ -126,7 +127,10 @@ void test_fri(){
     // Size is 2 * initial_domain_length to accommodate indices from first folding round
     // In practice, only 2 * num_colinearity_tests (52) entries will be used
     const size_t points_size = initial_domain_length / 2; // 2^19 for safety
-    std::vector<FieldT> points(points_size);
+    uint64_t **points = new uint64_t*[points_size];
+    for (size_t i = 0; i < points_size; ++i) {
+        points[i] = new uint64_t[FIELD_WORDS]();
+    }
     
     cout << "allocated points array with " << points_size << " entries" << endl;
     cout << "testing valid fri instance" << endl;
@@ -141,63 +145,63 @@ void test_fri(){
     // save_merkle_tree_to_file(merkle_tree_layers, 21, 8, "../data/merkle_tree_dump.txt");
     std::cout << "[TODO] Merkle tree saving not implemented due to type mismatch." << std::endl;
 
-    // // Run verifier
-    // clock_t t_verifier_start = clock();
-    // int verdict = verify(fri, points.data(), degree);
-    // clock_t t_verifier_end = clock();
-    // double verifier_time = double(t_verifier_end - t_verifier_start) / CLOCKS_PER_SEC;
-    
-    // cout << "Verifier time: " << verifier_time << " seconds" << endl;
+      // Run verifier
+     clock_t t_verifier_start = clock();
+    int verdict = verify(fri, points, degree);
+     clock_t t_verifier_end = clock();
+     double verifier_time = double(t_verifier_end - t_verifier_start) / CLOCKS_PER_SEC;
 
-    // if (verdict == 1) {
-    //     cout << "Proof accepted" << endl;
-    // } else {
-    //     cout << "Proof rejected (but should be valid!)" << endl;
-    //     return;
-    // }
+     cout << "Verifier time: " << verifier_time << " seconds" << endl;
+
+     if (verdict == 1) {
+         cout << "Proof accepted" << endl;
+     } else {
+         cout << "Proof rejected (but should be valid!)" << endl;
+         return;
+     }
     
-    // // Final polynomial evaluation check
-    // // Verify that the polynomial from last codeword evaluates correctly on initial domain
-    // cout << "Performing final polynomial evaluation check..." << endl;
+    // Final polynomial evaluation check
+    // Verify that the polynomial from last codeword evaluates correctly on initial domain
+    cout << "Performing final polynomial evaluation check..." << endl;
+
+    // For each colinearity test, verify polynomial evaluation
+    for (int i = 0; i < num_colinearity_tests; i++) {
+        // Compute i-th element in span of Cantor basis
+        // domain[i] = offset + sum(basis[j] where bit j of i is set)
+        FieldT domain_point = FieldT::zero();
     
-    // // For each colinearity test, verify polynomial evaluation
-    // for (int i = 0; i < num_colinearity_tests; i++) {
-    //     // Compute i-th element in span of Cantor basis
-    //     // domain[i] = offset + sum(basis[j] where bit j of i is set)
-    //     FieldT domain_point = FieldT::zero();
-        
-    //     for (int bit = 0; bit < m; bit++) {
-    //         if (i & (1 << bit)) {
-    //             domain_point += basis[bit];
-    //         }
-    //     }
-        
-    //     // Add offset (shift of affine subspace)
-    //     domain_point += domain.shift();
-        
-    //     // Evaluate polynomial at this domain point
-    //     // poly_eval: result = sum(poly_coeffs[j] * domain_point^j)
-    //     FieldT eval_result = FieldT::zero();
-    //     FieldT domain_power = FieldT::one();
-    //     for (size_t j = 0; j < poly_coeffs.size(); j++) {
-    //         eval_result += poly_coeffs[j] * domain_power;
-    //         domain_power *= domain_point;
-    //     }
-        
-    //     // Get the value from points array (filled during verify)
-    //     // Points at even indices are x-coords, odd indices are y-coords
-    //     FieldT expected_y = points[2 * i + 1];
-        
-    //     // Verify it matches
-    //     if (eval_result != expected_y) {
-    //         cout << "✗ Polynomial evaluates to wrong value at point " << i << endl;
-    //         cout << "Expected: " << expected_y << endl;
-    //         cout << "Got: " << eval_result << endl;
-    //         assert(false);
-    //     }
-    //}
+        for (int bit = 0; bit < m; bit++) {
+            if (i & (1 << bit)) {
+                domain_point += basis[bit];
+            }
+        }
     
-    //cout << "All polynomial evaluations correct!" << endl;
+        // Add offset (shift of affine subspace)
+        domain_point += domain.shift();
+    
+        // Evaluate polynomial at this domain point
+        // poly_eval: result = sum(poly_coeffs[j] * domain_point^j)
+        FieldT eval_result = FieldT::zero();
+        FieldT domain_power = FieldT::one();
+        for (size_t j = 0; j < poly_coeffs.size(); j++) {
+            eval_result += poly_coeffs[j] * domain_power;
+            domain_power *= domain_point;
+        }
+    
+        // Get the value from points array (filled during verify)
+        // Points at even indices are x-coords, odd indices are y-coords
+        FieldT expected_y = points[2 * i + 1];
+    
+        // Verify it matches
+        if (eval_result != expected_y) {
+            cout << "✗ Polynomial evaluates to wrong value at point " << i << endl;
+            cout << "Expected: " << expected_y << endl;
+            cout << "Got: " << eval_result << endl;
+            assert(false);
+        }
+    }
+    
+    cout << "All polynomial evaluations correct!" << endl;
     cout << "Success! \\o/" << endl;
     
 

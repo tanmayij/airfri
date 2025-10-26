@@ -14,7 +14,7 @@ const size_t CONCAT_WORDS = 8;  //FIELD_WORDS + HASH_WORDS
 void print_field_merkle(const char *label, const uint64_t *field, int field_words) {
     printf("%s: ", label);
     for (int i = 0; i < field_words; i++) {
-        printf("%016llx ", field[i]);
+    printf("%016lx ", field[i]);
     }
     printf("\n");
 }
@@ -34,7 +34,7 @@ void hash_sha3_256(const uint64_t *data, size_t len, uint64_t *out) {
 //Function to print the byte array
 void print_bytes(const uint64_t *bytes, size_t size) {
     for (size_t i = 0; i < size; i++) {
-        printf("%016llx", bytes[i]);
+    printf("%016lx", bytes[i]);
         if (i < size - 1) {
             printf(" ");
         }
@@ -120,7 +120,7 @@ void merkle_open(uint64_t **auth_path, int leaf_idx, size_t *proof_len, uint64_t
             memcpy(auth_path[*proof_len] + FIELD_WORDS, tree[i][sibling_index], sibling_size * sizeof(uint64_t));
 
         } else {
-            //For layers 13 to 16, only include the sibling (HASH_WORDS size)
+            //For layers 16 to 19, only include the sibling (HASH_WORDS size)
             sibling_size = HASH_WORDS;
             auth_path[*proof_len] = (uint64_t *)malloc(sibling_size * sizeof(uint64_t));
             if (!auth_path[*proof_len]) {

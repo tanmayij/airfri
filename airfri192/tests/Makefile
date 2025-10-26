@@ -7,6 +7,7 @@ CXXFLAGS    := -I../additive-fft/C++/ \
 	-I../external \
 	-O2 -std=c++17 \
 	-I../include \
+	-I../hash \
 	-I../additive-fft/C++/Cantor \
 	-I../additive-fft/C++/libiop/algebra \
 	-I$(LIBFF_INC) \
@@ -18,14 +19,18 @@ CXXFLAGS    := -I../additive-fft/C++/ \
 	-I$(CONDA_PREFIX)/include
 LDFLAGS     := -L../external/libff/build/libff -lff -lssl -lcrypto -lsodium -lgmp -L$(CONDA_PREFIX)/lib
 TARGET      := test_fri
-SRC         := test_fri.cu ../src/fri_utils.cu ../src/commit_kernel.cu ../src/field.cu ../src/hash.cu ../src/prove.cu ../src/fs_transform.cu ../src/sample_indices.cu \
+SRC         := test_fri.cu ../src/fri_utils.cu ../src/commit_kernel.cu ../src/field.cu  ../src/merkle.cu ../src/prove.cu ../src/query.cu ../src/fs_transform.cu ../src/sample_indices.cu ../src/verify.cu \
 	../external/libiop/libiop/common/common.cpp \
 	../external/libiop/libiop/algebra/utils.cpp
 
-all: $(TARGET)
+
+HASHLIB := ../hash/libhash.a
+
+all: $(HASHLIB) $(TARGET)
 
 $(TARGET): $(SRC)
-	$(NVCC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+	$(NVCC) $(CXXFLAGS) -o $@ $^ $(HASHLIB) $(LDFLAGS)
 
 clean:
 	rm -f $(TARGET)
+	$(MAKE) -C ../hash clean

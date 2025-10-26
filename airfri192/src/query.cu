@@ -1,10 +1,14 @@
-#include "../include/prove.cuh"
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <vector>
-
+#include "../include/query.cuh"
+#include "../include/fri_utils.cuh"
+#include "../include/fs_transform.cuh"
+#include "../include/merkle.cuh"
+#include "../include/prove.cuh"
 using namespace std;
+QueryIndices global_query_indices;
 void calculate_indices(size_t  *c_indices, size_t  *a_indices, size_t  *b_indices, int num_colinearity_tests) {
 
     for (int i = 0; i < num_colinearity_tests; i++) {
@@ -29,21 +33,34 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
     //the below loop is going to run for each round, for the total number of tests. 
     for(int s = 0; s < num_tests; s++){ 
         push_object(global_proof_stream, current_codeword[global_query_indices.a_indices[s]]);
-        print_field("current_codeword[a_indices[s]]", current_codeword[global_query_indices.a_indices[s]], field_words);
+        // Print as FieldT vector (assumes current_codeword stores uint64_t[4] for GF(2^256))
+        {
+            std::vector<uint64_t> words(current_codeword[global_query_indices.a_indices[s]], current_codeword[global_query_indices.a_indices[s]] + field_words);
+            FieldT elem(words[0], words[1], words[2], words[3]);
+            std::cout << "current_codeword[a_indices[s]]: " << elem << std::endl;
+        }
         push_count++;
         push_object(global_proof_stream, current_codeword[global_query_indices.b_indices[s]]);
-        print_field("current_codeword[b_indices[s]]", current_codeword[global_query_indices.b_indices[s]], field_words);
+        {
+            std::vector<uint64_t> words(current_codeword[global_query_indices.b_indices[s]], current_codeword[global_query_indices.b_indices[s]] + field_words);
+            FieldT elem(words[0], words[1], words[2], words[3]);
+            std::cout << "current_codeword[b_indices[s]]: " << elem << std::endl;
+        }
         push_count++;
         push_object(global_proof_stream, next_codeword[global_query_indices.c_indices[s]]);
-        print_field("next_codeword[c_indices[s]]", next_codeword[global_query_indices.c_indices[s]], field_words);
+        {
+            std::vector<uint64_t> words(next_codeword[global_query_indices.c_indices[s]], next_codeword[global_query_indices.c_indices[s]] + field_words);
+            FieldT elem(words[0], words[1], words[2], words[3]);
+            std::cout << "next_codeword[c_indices[s]]: " << elem << std::endl;
+        }
         push_count++;
 
         //below logic is to compute auth_paths for each of the codewords and their indices.
 
         //for a_index
-        size_t proof_len_a = 0;
-        uint64_t **auth_path_a = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
-        size_t *proof_len_ptr_a = (size_t *)malloc(sizeof(size_t));
+    size_t proof_len_a = 0;
+    uint64_t **auth_path_a = new uint64_t*[MAX_PROOF_PATH_LENGTH];
+    size_t *proof_len_ptr_a = new size_t;
         // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) { 
         // auth_path_a[i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));  
         // }
@@ -51,7 +68,11 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         *proof_len_ptr_a = proof_len_a;
         push_object(global_proof_stream, proof_len_ptr_a);
         push_count++;
-        printf("auth_path_a[0]: %016llx ", auth_path_a[0]);
+        if (auth_path_a[0]) {
+            printf("auth_path_a[0]: %016lx ", *auth_path_a[0]);
+        } else {
+            printf("auth_path_a[0]: NULL ");
+        }
         for (size_t i = 0; i < proof_len_a; i++) {
         //auth_path_a[%zu]\n", i);
         push_object(global_proof_stream, auth_path_a[i]); // Push each hash
@@ -62,13 +83,13 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
         //     free(auth_path_a[i]);
         // }
-        free(auth_path_a);
-        // free(proof_len_ptr_a);
+    delete[] auth_path_a;
+    // delete proof_len_ptr_a;
 
         //for b_index
-        size_t proof_len_b = 0; 
-        uint64_t **auth_path_b = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
-        size_t *proof_len_ptr_b = (size_t *)malloc(sizeof(size_t));
+    size_t proof_len_b = 0; 
+    uint64_t **auth_path_b = new uint64_t*[MAX_PROOF_PATH_LENGTH];
+    size_t *proof_len_ptr_b = new size_t;
         // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
         // auth_path_b[i] = (uint64_t *)malloc(HASH_SIZE);  //allocate space for each hash
         // }
@@ -86,13 +107,13 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
         //     free(auth_path_b[i]);
         // }
-        free(auth_path_b);
+    delete[] auth_path_b;
         
 
         //for c_index
-        size_t proof_len_c = 0;
-        uint64_t **auth_path_c = (uint64_t **)malloc(MAX_PROOF_PATH_LENGTH * sizeof(uint64_t *));
-        size_t *proof_len_ptr_c = (size_t *)malloc(sizeof(size_t));
+    size_t proof_len_c = 0;
+    uint64_t **auth_path_c = new uint64_t*[MAX_PROOF_PATH_LENGTH];
+    size_t *proof_len_ptr_c = new size_t;
         // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH; i++) {
         // auth_path_c[i] = (uint64_t *)malloc(HASH_SIZE);  //allocate space for each hash
         // }
@@ -109,7 +130,7 @@ size_t* query(Fri *fri, uint64_t ***codewords, uint64_t **current_codeword, size
         // for (size_t i = 0; i < MAX_PROOF_PATH_LENGTH - 1; i++) {
         //     free(auth_path_c[i]);
         // }
-        free(auth_path_c);
+    delete[] auth_path_c;
         // free(proof_len_ptr_c);
     }
     printf("Indices in query:\n");

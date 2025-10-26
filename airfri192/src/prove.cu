@@ -1,6 +1,7 @@
 
-#include "prove.cuh"
+#include "../include/prove.cuh"
 #include "fs_transform.cuh"
+#include <openssl/evp.h>
 using namespace std;
 ProofStream* global_proof_stream = NULL;
 #define FIELD_WORDS 4 //gf256 uses 4 uint64_t words
@@ -8,10 +9,13 @@ ProofStream* global_proof_stream = NULL;
 #include "fs_transform.cuh"
 #include "sample_indices.cuh"
 #include "fri_utils.cuh"
-#include "hash_host.cuh"
+#include "../include/hash_host.cuh"
+#include "../include/query.cuh"
 #include <iostream>
 #include <vector>
 #include <cstring>
+#include <cstdlib>
+#include "../include/merkle.cuh"
 #include <libff/algebra/fields/binary/gf256.hpp>
 #include <libiop/algebra/field_subset/field_subset.hpp>
 
@@ -20,13 +24,23 @@ ProofStream* global_proof_stream = NULL;
 using namespace std;
 typedef libff::gf256 FieldT;
 
-// External global proof stream
+
 extern ProofStream* global_proof_stream;
 void int_to_bytes(int n, unsigned char *bytes, size_t size) {
     for (size_t i = 0; i < size; i++) {
         bytes[size - 1 - i] = (unsigned char)(n >> (i * 8));
     }
 }
+// void hash_sha3_256(const uint64_t *data, size_t len, uint64_t *out) {
+//     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+//     const EVP_MD *md = EVP_sha3_256();
+
+//     EVP_DigestInit_ex(mdctx, md, NULL);
+//     EVP_DigestUpdate(mdctx, data, len);
+//     EVP_DigestFinal_ex(mdctx, (unsigned char *)out, NULL);
+
+//     EVP_MD_CTX_free(mdctx);
+// }
 uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_t **tree_layer) {
     cout << "=== Commit Phase (Host) ===" << endl;
     // uint64_t ***codewords = (uint64_t ***)malloc(fri_num_rounds(fri) + 1 * sizeof(uint64_t **));
@@ -34,7 +48,7 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
     int last_round = fri_num_rounds(fri);
     //get random bytes from Fiat-Shamir proof stash
     size_t N = codeword_len;
-    size_t num_bytes_alpha = 24; //assuming alpha fits in 24 bytes
+    // size_t num_bytes_alpha = 24; //unused variable, removed to fix warning
     // Sample alpha bytes deterministically from the proof stream
     // unsigned char* alpha_bytes = prover_fiat_shamir(global_proof_stream, num_bytes_alpha);
     //use libiop to sample field element from bytes
@@ -54,7 +68,7 @@ uint64_t ***commit_host(Fri *fri, uint64_t **codeword, int codeword_len, uint64_
     cout << "Codeword computations will happen on GPU kernel." << endl;
     for(int r = 0; r < fri_num_rounds(fri); r++) {
         cout << "Round " << r << " processing..." << endl;
-        hash_sha3_256((uint8_t*)alpha_words, 32, (uint8_t*)alpha_hash_output);
+        hash_sha3_256(alpha_words, 32, alpha_hash_output);
         // Optionally update alpha_words for next round if needed (not shown)
         cout << "Alpha hashed for round " << r << "." << endl;
         for(int i = 0; i < HASH_WORDS; i++) {
@@ -151,15 +165,15 @@ size_t* prove(Fri* fri, uint64_t **codeword, uint64_t **tree_layer) {
     size_t *indices = new size_t[fri->num_colinearity_tests];
     memcpy(indices, top_level_indices, fri->num_colinearity_tests * sizeof(size_t));
 
-    // Run query phase for each FRI round
-    // for (size_t r = 0; r < fri_num_rounds(fri) - 1; r++) {
-    //     // Query this round with current indices
-    //     indices = query(fri, codewords,
-    //                    codewords[r], codeword_length >> r,  // current codeword
-    //                    codewords[r+1], codeword_length >> (r+1),  // next codeword
-    //                    indices, r);
-    // }
-
+    // Run query phase for each FRI round-- optimize this. it is enough to run first round. 
+    //for (size_t r = 0; r < fri_num_rounds(fri) - 1; r++) {
+        // Query this round with current indices
+    indices = query(fri, codewords,
+                codewords[0], codeword_length >> 0,  // current codeword
+                codewords[1], codeword_length >> (1),  // next codeword
+                indices, 0);
+    //}
+    cout << "Completed query phase for all rounds." << endl;
     free(seed);
     free(reduced_indices);
 

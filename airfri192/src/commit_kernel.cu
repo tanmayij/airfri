@@ -1,16 +1,256 @@
-
 #include <cuda_runtime.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstdint>
 #include <cstring>
-#include "../include/hash.cuh"
+// #include "../hash/hash.cuh"
 //#include "../include/hash_host.cuh"
 #include "../include/commit_kernel.cuh"
 #include "../include/field.cuh"
 //#include "../additive-fft/C++/Cantor/cantor_basis.hpp"
 extern int field_words;
 #include "../include/fri_utils.cuh"
+using namespace std;
+//hash
+#include <stdio.h>
+ #include <stdint.h>
+ #include <string.h>
+ 
+ #include "hash.cuh"
+ 
+ #define SHA3_ASSERT( x )
+ #define SHA3_TRACE( format, ...)
+ #define SHA3_TRACE_BUF(format, buf, l)
+ 
+ /* 
+  * This flag is used to configure "pure" Keccak, as opposed to NIST SHA3.
+  */
+ #define SHA3_USE_KECCAK_FLAG 0x80000000
+ #define SHA3_CW(x) ((x) & (~SHA3_USE_KECCAK_FLAG))
+ 
+ #if defined(_MSC_VER)
+ #define SHA3_CONST(x) x
+ #else
+ #define SHA3_CONST(x) x##L
+ #endif
+ 
+ #ifndef SHA3_ROTL64
+ #define SHA3_ROTL64(x, y) \
+     (((x) << (y)) | ((x) >> ((sizeof(uint64_t)*8) - (y))))
+ #endif
+ 
+ __device__ static const uint64_t keccakf_rndc[24] = {
+     SHA3_CONST(0x0000000000000001UL), SHA3_CONST(0x0000000000008082UL),
+     SHA3_CONST(0x800000000000808aUL), SHA3_CONST(0x8000000080008000UL),
+     SHA3_CONST(0x000000000000808bUL), SHA3_CONST(0x0000000080000001UL),
+     SHA3_CONST(0x8000000080008081UL), SHA3_CONST(0x8000000000008009UL),
+     SHA3_CONST(0x000000000000008aUL), SHA3_CONST(0x0000000000000088UL),
+     SHA3_CONST(0x0000000080008009UL), SHA3_CONST(0x000000008000000aUL),
+     SHA3_CONST(0x000000008000808bUL), SHA3_CONST(0x800000000000008bUL),
+     SHA3_CONST(0x8000000000008089UL), SHA3_CONST(0x8000000000008003UL),
+     SHA3_CONST(0x8000000000008002UL), SHA3_CONST(0x8000000000000080UL),
+     SHA3_CONST(0x000000000000800aUL), SHA3_CONST(0x800000008000000aUL),
+     SHA3_CONST(0x8000000080008081UL), SHA3_CONST(0x8000000000008080UL),
+     SHA3_CONST(0x0000000080000001UL), SHA3_CONST(0x8000000080008008UL)
+ };
+ 
+ __device__ static const unsigned keccakf_rotc[24] = {
+     1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62,
+     18, 39, 61, 20, 44
+ };
+ 
+ __device__ static const unsigned keccakf_piln[24] = {
+     10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12, 2, 20,
+     14, 22, 9, 6, 1
+ };
+ 
+ /* generally called after SHA3_KECCAK_SPONGE_WORDS-ctx->capacityWords words 
+  * are XORed into the state s 
+  */
+  __device__ void keccakf(uint64_t s[25]) {
+     int i, j, round;
+     uint64_t t, bc[5];
+     #define KECCAK_ROUNDS 24
+ 
+     for (round = 0; round < KECCAK_ROUNDS; round++) {
+         /* Theta */
+         for (i = 0; i < 5; i++) {
+             bc[i] = s[i] ^ s[i + 5] ^ s[i + 10] ^ s[i + 15] ^ s[i + 20];
+         }
+ 
+         for (i = 0; i < 5; i++) {
+             t = bc[(i + 4) % 5] ^ SHA3_ROTL64(bc[(i + 1) % 5], 1);
+             for (j = 0; j < 25; j += 5) {
+                 s[j + i] ^= t;
+             }
+         }
+ 
+         /* Rho Pi */
+         t = s[1];
+         for (i = 0; i < 24; i++) {
+             j = keccakf_piln[i];
+             bc[0] = s[j];
+             s[j] = SHA3_ROTL64(t, keccakf_rotc[i]);
+             t = bc[0];
+         }
+ 
+         /* Chi */
+         for (j = 0; j < 25; j += 5) {
+             for (i = 0; i < 5; i++) {
+                 bc[i] = s[j + i];
+             }
+             for (i = 0; i < 5; i++) {
+                 s[j + i] ^= (~bc[(i + 1) % 5]) & bc[(i + 2) % 5];
+             }
+         }
+ 
+         /* Iota */
+         s[0] ^= keccakf_rndc[round];
+     }
+ }
+ 
+ /* *************************** Public Interface ************************ */
+ 
+ /* For Init or Reset call these: */
+ __device__ sha3_return_t sha3_Init(void *priv, unsigned bitSize) {
+     sha3_context *ctx = (sha3_context *)priv;
+     if (bitSize != 256 && bitSize != 384 && bitSize != 512) {
+         return SHA3_RETURN_BAD_PARAMS;
+     }
+     memset(ctx, 0, sizeof(*ctx));  // Replace with cuda-compatible memset if needed
+     ctx->capacityWords = 2 * bitSize / (8 * sizeof(uint64_t));
+     return SHA3_RETURN_OK;
+ }
+ 
+ __device__ void sha3_Init256(void *priv) {
+     sha3_Init(priv, 256);
+ }
+ 
+ __device__ void sha3_Init384(void *priv) {
+     sha3_Init(priv, 384);
+ }
+ 
+ __device__ void sha3_Init512(void *priv) {
+     sha3_Init(priv, 512);
+ }
+ 
+ __device__ enum SHA3_FLAGS sha3_SetFlags(void *priv, enum SHA3_FLAGS flags) {
+     sha3_context *ctx = (sha3_context *)priv;
+     flags = (enum SHA3_FLAGS)((uint32_t)flags & (uint32_t)SHA3_FLAGS_KECCAK);
+     ctx->capacityWords |= (flags == SHA3_FLAGS_KECCAK ? SHA3_USE_KECCAK_FLAG : 0);
+     return flags;
+ }
+ 
+ __device__ void sha3_Update(void *priv, void const *bufIn, size_t len) {
+     sha3_context *ctx = (sha3_context *)priv;
+ 
+     unsigned old_tail = (8 - ctx->byteIndex) & 7;
+ 
+     size_t words;
+     unsigned tail;
+     size_t i;
+ 
+     const uint8_t *buf = (const uint8_t *)bufIn;
+ 
+     if (len < old_tail) {
+         while (len--) {
+             ctx->saved |= (uint64_t)(*(buf++)) << ((ctx->byteIndex++) * 8);
+         }
+         return;
+     }
+ 
+     if (old_tail) {
+         len -= old_tail;
+         while (old_tail--) {
+             ctx->saved |= (uint64_t)(*(buf++)) << ((ctx->byteIndex++) * 8);
+         }
+         ctx->u.s[ctx->wordIndex] ^= ctx->saved;
+         ctx->byteIndex = 0;
+         ctx->saved = 0;
+         if (++ctx->wordIndex == (SHA3_KECCAK_SPONGE_WORDS - SHA3_CW(ctx->capacityWords))) {
+             keccakf(ctx->u.s);
+             ctx->wordIndex = 0;
+         }
+     }
+ 
+     words = len / sizeof(uint64_t);
+     tail = len - words * sizeof(uint64_t);
+ 
+     for (i = 0; i < words; i++, buf += sizeof(uint64_t)) {
+         uint64_t t = (uint64_t)(buf[0]) |
+                      ((uint64_t)(buf[1]) << 8 * 1) |
+                      ((uint64_t)(buf[2]) << 8 * 2) |
+                      ((uint64_t)(buf[3]) << 8 * 3) |
+                      ((uint64_t)(buf[4]) << 8 * 4) |
+                      ((uint64_t)(buf[5]) << 8 * 5) |
+                      ((uint64_t)(buf[6]) << 8 * 6) |
+                      ((uint64_t)(buf[7]) << 8 * 7);
+         ctx->u.s[ctx->wordIndex] ^= t;
+         if (++ctx->wordIndex == (SHA3_KECCAK_SPONGE_WORDS - SHA3_CW(ctx->capacityWords))) {
+             keccakf(ctx->u.s);
+             ctx->wordIndex = 0;
+         }
+     }
+ 
+     while (tail--) {
+         ctx->saved |= (uint64_t)(*(buf++)) << ((ctx->byteIndex++) * 8);
+     }
+ }
+ 
+ __device__ void const *sha3_Finalize(void *priv) {
+     sha3_context *ctx = (sha3_context *)priv;
+     uint64_t t;
+ 
+     if (ctx->capacityWords & SHA3_USE_KECCAK_FLAG) {
+         t = (uint64_t)(((uint64_t)1) << (ctx->byteIndex * 8));
+     } else {
+         t = (uint64_t)(((uint64_t)(0x02 | (1 << 2))) << ((ctx->byteIndex) * 8));
+     }
+ 
+     ctx->u.s[ctx->wordIndex] ^= ctx->saved ^ t;
+     ctx->u.s[SHA3_KECCAK_SPONGE_WORDS - SHA3_CW(ctx->capacityWords) - 1] ^= SHA3_CONST(0x8000000000000000UL);
+     keccakf(ctx->u.s);
+ 
+     return (ctx->u.sb);
+ }
+ 
+ __device__ sha3_return_t sha3_HashBuffer(unsigned bitSize, enum SHA3_FLAGS flags, const void *in, unsigned inBytes, void *out, unsigned outBytes) {
+     sha3_return_t err;
+     sha3_context c;
+ 
+     err = sha3_Init(&c, bitSize);
+     if (err != SHA3_RETURN_OK) {
+         return err;
+     }
+     if (sha3_SetFlags(&c, flags) != flags) {
+         return SHA3_RETURN_BAD_PARAMS;
+     }
+     sha3_Update(&c, in, inBytes);
+     const void *h = sha3_Finalize(&c);
+ 
+     if (outBytes > bitSize / 8) {
+         outBytes = bitSize / 8;
+     }
+     memcpy(out, h, outBytes);
+     return SHA3_RETURN_OK;
+ }
+
+__device__ void SHA3(uint8_t *hm, const uint8_t *msg, size_t msg_len, size_t bitSize)
+{   
+    SHA3s(hm, (const uint8_t *[]){msg}, (size_t[]){msg_len}, 1, bitSize);
+}
+
+__device__ void SHA3s(uint8_t *hm, const uint8_t **msgs, size_t *msgs_len, size_t items, size_t bitSize)
+{
+    sha3_context ctx;
+    sha3_Init(&ctx, bitSize);
+    for (size_t i = 0; i < items; ++i)
+    {
+        sha3_Update(&ctx, msgs[i], msgs_len[i]);
+    }
+    const void *result = sha3_Finalize(&ctx);
+    memcpy(hm, result, bitSize / 8);
+}
 namespace cantor {
     constexpr uint64_t cantor_in_gf2to256[32][4] = {
 { 1ULL, 0ULL, 0ULL, 0ULL }, 
@@ -52,7 +292,6 @@ namespace cantor {
 #define FIELD_WORDS 4
 #define CONCAT_WORDS (FIELD_WORDS + HASH_WORDS)
 
-//void SHA3_host(uint8_t *hm, const uint8_t *msg, size_t msg_len, size_t bitSize);
 
 inline void cantor_Lk(uint64_t* out, const uint64_t basis[][4], int basis_len, size_t idx) {
     for(int w = 0; w < 4; w++) out[w] = 0;
@@ -217,7 +456,7 @@ __global__ void merkle_kernel(
     int N
 ) {
     int I = blockIdx.x * blockDim.x + threadIdx.x;
-    int idx1, idx2, idx3, idx4;
+    int idx1, idx2, idx3, idx4, idx5;
 
     if (I >= N / 2) return;
 
@@ -226,6 +465,7 @@ __global__ void merkle_kernel(
         idx2 = (2 * I + 1) * (FIELD_WORDS + HASH_WORDS);
         idx3 = I * HASH_WORDS;
         idx4 = I * (2 * (FIELD_WORDS + HASH_WORDS));
+        idx5 = I * (FIELD_WORDS + HASH_WORDS);
 
         for (int j = 0; j < (FIELD_WORDS + HASH_WORDS); j++) {
             device_combined_sibling_codewords[idx4 + j] = device_tree_layer[idx1 + j];
@@ -243,14 +483,19 @@ __global__ void merkle_kernel(
         idx1 = 2 * I * HASH_WORDS;
         idx2 = (2 * I + 1) * HASH_WORDS;
         idx3 = I * HASH_WORDS;
-
+        idx4 = I * (2 * HASH_WORDS);
+        
         for (int j = 0; j < HASH_WORDS; j++) {
-            device_combined_sibling_hashes[idx1 + j] = device_tree_layer[idx1 + j];
-            device_combined_sibling_hashes[idx1 + HASH_WORDS + j] = device_tree_layer[idx2 + j];
+            device_combined_sibling_hashes[idx4 + j] = device_tree_layer[idx1 + j];
+            device_combined_sibling_hashes[idx4 + HASH_WORDS + j] = device_tree_layer[idx2 + j];
         }
+        printf("combined_sibling_hashes before SHA3 in merkle kernel: ");
+        for (int j = 0; j < 2 * HASH_WORDS; j++) {
+            printf("%016lx ", device_combined_sibling_hashes[j]);
+        }
+        printf("\n");
 
-        SHA3((uint8_t *)&device_digest[idx3], (uint8_t *)&device_combined_sibling_hashes[idx1], 
-             2 * HASH_WORDS * sizeof(uint64_t), 256);
+        SHA3((uint8_t *)&device_digest[idx3], (uint8_t *)&device_combined_sibling_hashes[idx4], 2 * HASH_WORDS * sizeof(uint64_t), 256);
 
         for (int j = 0; j < HASH_WORDS; j++) {
             device_tree_layer_nxt[idx3 + j] = device_digest[idx3 + j];
@@ -540,6 +785,8 @@ void commit_launch(
     // cudaMemcpy(flattened_alpha_offset, device_alpha_offset, N/2 * FIELD_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
     cudaMemcpy(flattened_tree_layer_nxt, device_tree_layer_nxt, (N / 2) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToHost);
 
+    
+
     write_to_file("temp1.txt", flattened_temp1, FIELD_WORDS, N/2);
     write_to_file("temp2.txt", flattened_temp2, FIELD_WORDS, N/2);
     write_to_file("temp3.txt", flattened_temp3, FIELD_WORDS, N/2);
@@ -589,10 +836,12 @@ void commit_launch(
 
     if (is_last_round) { 
         
-        int tree_idx = last_round;  //start with layer 12 which holds 32 elements
+        int tree_idx = last_round;  //start with tree[15] which will hold 32 elements
+        //pring last_round value
+        cout << "Last round value in commit_launch: " << last_round << endl;
         int next_N = N / 2; //initialize to 32 for the next layer size
-        
-        //first transfer the tree_layer_nxt elements to tree[12]
+
+        //first transfer the tree_layer_nxt elements to tree[15]
         tree[tree_idx] = (uint64_t **)malloc((next_N) * sizeof(uint64_t *));
         for (int i = 0; i < next_N; i++) {
             tree[tree_idx][i] = (uint64_t *)malloc(CONCAT_WORDS * sizeof(uint64_t));
@@ -609,22 +858,22 @@ void commit_launch(
             printf("\n");
         }
         /*steps:
-        1. tree[12] is filled, flattened_tree_layer_nxt has 32 elements now
+        1. tree[14] is filled, flattened_tree_layer_nxt has 32 elements now
         2. allocate memory to device variables tree and tree_nxt (host to device)
         3.copy device_tree_layer = flattened_tree_layer_nxt
         4.realloc memory for flattened_tree_layer and flattened_tree_layer_nxt
         5. then launch merkle_kernel  */
     
         //copy the tree_layer_nxt to tree_layer
-        cudaMalloc((void **)&device_tree_layer, (next_N) * CONCAT_WORDS * sizeof(uint64_t));
-        cudaMalloc((void **)&device_tree_layer_nxt, (next_N / 2) * CONCAT_WORDS * sizeof(uint64_t)); //will be computed in the next few lines
-        cudaMemcpy(device_tree_layer, flattened_tree_layer_nxt, (next_N) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyHostToDevice);
+        cudaMalloc((void **)&device_tree_layer, (next_N) * CONCAT_WORDS * sizeof(uint64_t)); //32
+        cudaMalloc((void **)&device_tree_layer_nxt, (next_N / 2) * HASH_WORDS * sizeof(uint64_t)); //will be computed in the next few lines //16
+        cudaMemcpy(device_tree_layer, flattened_tree_layer_nxt, (next_N) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyHostToDevice); //32
     
         //now, flattened_tree_layer will be 32 and flattened_tree_layer_nxt will be 16
-        flattened_tree_layer = (uint64_t *)realloc(flattened_tree_layer, (next_N) * CONCAT_WORDS * sizeof(uint64_t));
-        flattened_tree_layer_nxt = (uint64_t *)realloc(flattened_tree_layer_nxt, (next_N / 2) * CONCAT_WORDS * sizeof(uint64_t));
+        flattened_tree_layer = (uint64_t *)realloc(flattened_tree_layer, (next_N) * CONCAT_WORDS * sizeof(uint64_t)); //32
+        flattened_tree_layer_nxt = (uint64_t *)realloc(flattened_tree_layer_nxt, (next_N / 2) * HASH_WORDS * sizeof(uint64_t)); //16
        
-        tree_idx++;  //move to the next tree layer index, which is 13
+        tree_idx++;  //move to the next tree layer index, which is 1
 
         // // Step 3: transfer 
         // cudaMemcpy(device_tree_layer, device_tree_layer_nxt, (next_N / 2) * CONCAT_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToDevice);
@@ -644,11 +893,12 @@ void commit_launch(
 
         //step 3: Loop over remaining layers, updating tree[layer] with each iteration
         while (next_N > 2) {
-
+            //print current next_N 
+            cout << "Current next_N in loop: " << next_N << endl;
             int tpb = min(32, next_N / 2);
             if(tpb == 0) {tpb = 1;}
             int nb = (next_N + tpb - 1) / tpb;
-            
+
             // merkle_kernel for each layer (computes next layer hashes)
             merkle_kernel<<<nb, tpb>>>(device_layer_hashes, device_merkle_root, device_tree_layer, device_tree_layer_nxt, device_combined_sibling_codewords, device_digest, device_combined_sibling_hashes, next_N);
             cudaDeviceSynchronize();
@@ -669,23 +919,29 @@ void commit_launch(
                     tree[tree_idx][i][j] = flattened_tree_layer_nxt[i * HASH_WORDS + j];
                 }
             }
-            uint64_t *temp = device_tree_layer;
+            cudaFree(device_combined_sibling_codewords);
+            cudaMalloc((void**)&device_combined_sibling_codewords, (next_N / 2) * 2 * HASH_WORDS * sizeof(uint64_t)); //pick just hashes after merkle_launch launches the first time. 
+            uint64_t *temp = device_tree_layer; 
             device_tree_layer = device_tree_layer_nxt;
-            device_tree_layer_nxt = temp;
+            // device_tree_layer_nxt = temp;
             tree_idx++;
-            flattened_tree_layer_nxt = (uint64_t *)realloc(flattened_tree_layer_nxt, (next_N / 2) * CONCAT_WORDS * sizeof(uint64_t));
+            //print tree_idx
+            cout << "Current tree_idx in loop: " << tree_idx << endl;
+            next_N /= 2;
+            //print next_N
+            cout << "Updated next_N in loop: " << next_N << endl;
+            flattened_tree_layer_nxt = (uint64_t *)realloc(flattened_tree_layer_nxt, (next_N) * HASH_WORDS * sizeof(uint64_t)); //fixed from CONCAT_WORDS to HASH_WORDS
             //step 4: Update device_tree_layer with the contents of device_tree_layer_nxt
             //cudaMemcpy(device_tree_layer, device_tree_layer_nxt, (next_N / 2) * HASH_WORDS * sizeof(uint64_t), cudaMemcpyDeviceToDevice);
 
-            next_N /= 2;
 
         }// close while
         //do not delete the below code - only comment it
         int number = 0;
-        for (int layer = 14; layer <= 19; layer++) {
+        for (int layer = 15; layer <= 19; layer++) {
             int elements = 1 << (20 - layer);  // Number of elements in this layer
             printf("\n=== DEBUG: tree[%d] Elements ===\n", layer);
-            if (layer == 14) { number = 8;}
+            if (layer == 15) { number = 8;}
             else { number = 4;}
             for (int i = 0; i < elements; i++) {
                 printf("Index %d: ", i);
@@ -694,14 +950,6 @@ void commit_launch(
                 }
                 printf("\n");
             }
-        }
-        printf("\n=== DEBUG: tree[14] Elements ===\n");
-        for (int i = 0; i < 16; i++) {  // 16 elements in layer 14
-            printf("Index %d: ", i);
-            for (int j = 0; j < 8; j++) {
-                printf("%016lx ", tree[14][i][j]);  // Print each hash
-            }
-            printf("\n");
         }
         printf("\n=== DEBUG: tree[18] Elements (Last Layer Before Merkle Root) ===\n");
         for (int i = 0; i < 2; i++) {  // 2 elements in layer 18
@@ -725,6 +973,7 @@ void commit_launch(
             printf("%016lx ", root[i]);
         }
         printf("\n");
+        
     cudaFree(device_tree_layer);
     cudaFree(device_tree_layer_nxt);
     cudaFree(device_codeword_nxt);
@@ -734,6 +983,7 @@ void commit_launch(
     }
     free(flattened_codeword);
     free(flattened_codeword_nxt);
+
 
     printf("Memory freed and commit_launch completed.\n");
 }

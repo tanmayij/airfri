@@ -1,8 +1,9 @@
 #include "iostream"
 #include "vector"
 #include "fri_utils.cuh"
+#include "fs_transform.cuh"
 using namespace std;
-
+extern ProofStream* global_proof_stream;
 //function definitions 
 #include <vector>
 #include <libff/algebra/fields/binary/gf256.hpp>
